@@ -17,11 +17,11 @@
     "@web3-react/injected-connector": "^6.0.7",
     "canvas-confetti": "^1.9.3",
     "ethers": "^5.8.0",
-    "framer-motion": "^11.11.17",
+    "framer-motion": "^11.18.2",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-hot-toast": "^2.4.1",
+    "react-hot-toast": "^2.6.0",
     "viem": "^2.39.3",
     "wagmi": "^2.19.4"
   },
