@@ -1,0 +1,61 @@
+# Qodo Ignore File - Root Level
+# Specify files and directories that Qodo should ignore
+
+# Dependencies
+node_modules/
+lib/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Environment variables
+.env
+.env.local
+.env.production
+*.key
+*.pem
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Temporary files
+*.tmp
+.cache/
+
+# Lock files
+package-lock.json
+yarn.lock
+foundry.lock
+
+# Source maps
+*.map
+*.min.js
+
+# Generated files
+*.generated.*
+*.tsbuildinfo
+
+# Git
+.git/
+
+# Misc
+.eslintcache

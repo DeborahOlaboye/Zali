@@ -1,0 +1,535 @@
+# Qodo Configuration for Zali (Celo Knowledge Quest)
+# Root-level configuration for the entire monorepo
+# This configuration covers both smart contracts and frontend
+
+# Project Information
+project:
+  name: "Zali - Celo Knowledge Quest"
+  description: "Mobile-first educational play-to-earn trivia game with prediction market on Celo blockchain"
+  type: "monorepo"
+  language: "solidity,typescript"
+  version: "1.0.0"
+  
+# Monorepo Structure
+workspace:
+  type: "monorepo"
+  packages:
+    - path: "contracts"
+      name: "Smart Contracts"
+      type: "foundry"
+      language: "solidity"
+    - path: "frontend"
+      name: "Frontend Application"
+      type: "nextjs"
+      language: "typescript"
+
+# Code Review Settings
+code_review:
+  # Enable automatic code review on commits
+  auto_review: true
+  
+  # Review focus areas
+  focus:
+    - security
+    - gas_optimization
+    - smart_contract_best_practices
+    - web3_integration
+    - performance
+    - best_practices
+    - react_patterns
+    - mobile_optimization
+    
+  # Ignore patterns for code review
+  ignore:
+    - "node_modules/**"
+    - ".next/**"
+    - "dist/**"
+    - "build/**"
+    - "out/**"
+    - "cache/**"
+    - "broadcast/**"
+    - "lib/**"
+    - "*.min.js"
+    - "*.map"
+    - "package-lock.json"
+    - ".git/**"
+
+# Smart Contract Specific Settings
+smart_contracts:
+  # Solidity version
+  solidity_version: "^0.8.20"
+  
+  # Framework
+  framework: "foundry"
+  
+  # Security checks
+  security:
+    - check_reentrancy
+    - check_access_control
+    - check_integer_overflow
+    - check_unchecked_calls
+    - validate_external_calls
+    - check_gas_limits
+    - validate_modifiers
+    
+  # Gas optimization
+  gas_optimization:
+    enabled: true
+    threshold: 100000
+    
+  # Testing requirements
+  testing:
+    framework: "forge"
+    coverage_minimum: 80
+    patterns:
+      - "test/**/*.t.sol"
+      - "test/**/*.sol"
+      
+  # Contract patterns
+  patterns:
+    - "src/**/*.sol"
+    - "script/**/*.sol"
+    
+  # OpenZeppelin usage
+  dependencies:
+    - "@openzeppelin/contracts"
+    
+  # Deployment networks
+  networks:
+    - name: "celo-alfajores"
+      chain_id: 44787
+    - name: "celo-mainnet"
+      chain_id: 42220
+
+# Testing Configuration
+testing:
+  # Test frameworks
+  frameworks:
+    - name: "forge"
+      path: "contracts"
+      patterns:
+        - "test/**/*.t.sol"
+    - name: "jest"
+      path: "frontend"
+      patterns:
+        - "**/*.test.ts"
+        - "**/*.test.tsx"
+        - "**/*.spec.ts"
+        - "**/*.spec.tsx"
+  
+  # Test coverage thresholds
+  coverage:
+    minimum: 75
+    contracts_minimum: 80
+    frontend_minimum: 70
+    
+  # Critical paths requiring tests
+  critical_paths:
+    - "contracts/src/Faucet.sol"
+    - "contracts/src/TriviaGame.sol"
+    - "contracts/src/PredictionMarket.sol"
+    - "frontend/src/hooks/**"
+    - "frontend/src/config/**"
+
+# Documentation Settings
+documentation:
+  # Auto-generate documentation
+  auto_generate: true
+  
+  # Documentation style
+  styles:
+    solidity: "natspec"
+    typescript: "jsdoc"
+  
+  # Include in documentation
+  include:
+    - "contracts/src/**/*.sol"
+    - "frontend/src/**/*.ts"
+    - "frontend/src/**/*.tsx"
+    - "README.md"
+    - "zali.md"
+    
+  # Exclude from documentation
+  exclude:
+    - "**/*.test.ts"
+    - "**/*.test.tsx"
+    - "**/*.t.sol"
+    - "node_modules/**"
+    - "lib/**"
+
+# Code Quality Settings
+quality:
+  # Linting
+  linting:
+    enabled: true
+    configs:
+      solidity: "foundry.toml"
+      typescript: "frontend/eslint.config.mjs"
+    
+  # Type checking
+  type_checking:
+    enabled: true
+    configs:
+      typescript: "frontend/tsconfig.json"
+    
+  # Code complexity thresholds
+  complexity:
+    max_function_length: 50
+    max_file_length: 500
+    max_cyclomatic_complexity: 10
+    max_contract_size: 24576  # 24KB for Ethereum contracts
+
+# Web3 Specific Settings
+web3:
+  # Blockchain
+  blockchain: "celo"
+  
+  # Contract interaction patterns
+  contract_patterns:
+    - "frontend/src/config/**"
+    - "frontend/src/hooks/**"
+    - "contracts/src/**"
+    
+  # Security checks for Web3
+  security:
+    - check_private_key_exposure
+    - validate_contract_addresses
+    - check_transaction_signing
+    - validate_rpc_endpoints
+    - check_abi_usage
+    - validate_gas_estimates
+    
+  # MiniPay specific
+  minipay:
+    enabled: true
+    checks:
+      - validate_fee_currency
+      - check_mobile_optimization
+      - validate_transaction_type
+
+# Build and Deployment
+build:
+  # Build commands
+  commands:
+    contracts: "forge build"
+    frontend: "npm run build"
+  
+  # Output directories
+  outputs:
+    contracts: "contracts/out"
+    frontend: "frontend/.next"
+  
+  # Environment files
+  env_files:
+    - "contracts/.env"
+    - "frontend/.env.local"
+    - "frontend/.env.production"
+
+# Git Integration
+git:
+  # Branch protection
+  protected_branches:
+    - "main"
+    - "master"
+    - "production"
+    
+  # Commit message format
+  commit_format:
+    enabled: true
+    pattern: "^(feat|fix|docs|style|refactor|test|chore)(\\(contracts|frontend|root\\))?: .{1,100}"
+    examples:
+      - "feat(contracts): add PredictionMarket contract"
+      - "fix(frontend): resolve MiniPay detection issue"
+      - "docs(root): update README with deployment instructions"
+  
+  # Pre-commit hooks
+  pre_commit:
+    - "forge test"
+    - "npm run lint --prefix frontend"
+
+# AI Assistant Settings
+ai:
+  # Context awareness
+  context:
+    - "This is a Celo blockchain project"
+    - "Monorepo with Foundry contracts and Next.js frontend"
+    - "Smart contracts: Faucet, TriviaGame, PredictionMarket"
+    - "Frontend uses Next.js 16, TypeScript, Wagmi, RainbowKit"
+    - "Optimized for Celo MiniPay mobile wallet"
+    - "Uses cUSD stablecoin for all transactions"
+    - "Educational play-to-earn trivia game with prediction market"
+    - "Deployed on Celo Alfajores testnet"
+    
+  # Coding standards
+  standards:
+    solidity:
+      - "Follow Solidity style guide and best practices"
+      - "Use OpenZeppelin contracts for security"
+      - "Implement proper access control (Ownable)"
+      - "Use ReentrancyGuard for external calls"
+      - "Add comprehensive NatSpec documentation"
+      - "Optimize for gas efficiency"
+      - "Write comprehensive tests (>80% coverage)"
+      - "Use events for important state changes"
+      - "Validate all inputs"
+      - "Handle edge cases properly"
+    
+    typescript:
+      - "Follow React best practices and hooks rules"
+      - "Use TypeScript strict mode"
+      - "Implement proper error handling for Web3 interactions"
+      - "Use async/await for asynchronous operations"
+      - "Follow Next.js App Router conventions"
+      - "Ensure responsive design with Tailwind"
+      - "Handle wallet connection states properly"
+      - "Validate user inputs and transaction parameters"
+      - "Use proper loading and error states"
+      - "Optimize for mobile (MiniPay)"
+
+# File Patterns
+files:
+  # Source files
+  source:
+    contracts:
+      - "contracts/src/**/*.sol"
+      - "contracts/script/**/*.sol"
+    frontend:
+      - "frontend/src/**/*.ts"
+      - "frontend/src/**/*.tsx"
+    
+  # Test files
+  test:
+    contracts:
+      - "contracts/test/**/*.t.sol"
+    frontend:
+      - "frontend/**/*.test.ts"
+      - "frontend/**/*.test.tsx"
+    
+  # Configuration files
+  config:
+    - "*.config.*"
+    - "foundry.toml"
+    - "tsconfig.json"
+    - "package.json"
+    - ".qodo.yaml"
+    
+  # Ignore patterns
+  ignore:
+    - "node_modules/**"
+    - ".next/**"
+    - "dist/**"
+    - "build/**"
+    - "out/**"
+    - "cache/**"
+    - "broadcast/**"
+    - "lib/**"
+    - "coverage/**"
+    - "*.log"
+    - ".env*"
+    - ".git/**"
+    - "*.min.js"
+    - "*.map"
+
+# Performance Monitoring
+performance:
+  # Smart contract gas limits
+  gas_limits:
+    deployment_max: 5000000
+    transaction_max: 500000
+    
+  # Frontend bundle size limits (in KB)
+  bundle_size:
+    max_initial: 500
+    max_total: 2000
+    
+  # Performance budgets
+  budgets:
+    - metric: "first-contentful-paint"
+      max: 2000
+    - metric: "time-to-interactive"
+      max: 5000
+
+# Security Settings
+security:
+  # Smart contract security
+  smart_contracts:
+    - check_reentrancy_attacks
+    - validate_access_control
+    - check_integer_overflow
+    - validate_external_calls
+    - check_delegatecall_usage
+    - validate_randomness
+    - check_timestamp_dependence
+    
+  # Dependency scanning
+  dependency_scan:
+    enabled: true
+    severity: "medium"
+    
+  # Secret detection
+  secret_detection:
+    enabled: true
+    patterns:
+      - "private.*key"
+      - "secret"
+      - "password"
+      - "api.*key"
+      - "mnemonic"
+      - "PRIVATE_KEY"
+      - "SECRET"
+      
+  # Security headers check (frontend)
+  headers:
+    - "Content-Security-Policy"
+    - "X-Frame-Options"
+    - "X-Content-Type-Options"
+
+# Notifications
+notifications:
+  # Enable notifications
+  enabled: true
+  
+  # Notification channels
+  channels:
+    - type: "console"
+      level: "info"
+  
+  # Notify on
+  events:
+    - "test_failure"
+    - "security_issue"
+    - "deployment"
+    - "high_gas_usage"
+
+# Custom Rules
+custom_rules:
+  # Solidity rules
+  - name: "No hardcoded addresses in contracts"
+    pattern: "0x[a-fA-F0-9]{40}"
+    severity: "warning"
+    files: "contracts/src/**/*.sol"
+    message: "Avoid hardcoded addresses, use constructor parameters or constants"
+    
+  - name: "Require NatSpec documentation"
+    pattern: "function.*public|external"
+    severity: "info"
+    files: "contracts/src/**/*.sol"
+    message: "Add NatSpec documentation (@notice, @param, @return)"
+    
+  - name: "Use SafeERC20 for token transfers"
+    pattern: "IERC20.*transfer"
+    severity: "warning"
+    files: "contracts/src/**/*.sol"
+    message: "Consider using SafeERC20 for safer token transfers"
+  
+  # TypeScript rules
+  - name: "No console.log in production"
+    pattern: "console\\.log"
+    severity: "warning"
+    files: "frontend/src/**/*.ts*"
+    exclude:
+      - "**/*.test.ts"
+      - "**/*.test.tsx"
+    message: "Remove console.log statements before production"
+    
+  - name: "Use environment variables for contract addresses"
+    pattern: "0x[a-fA-F0-9]{40}"
+    severity: "warning"
+    files: "frontend/src/**/*.ts*"
+    exclude:
+      - "frontend/src/config/**"
+    message: "Use environment variables for contract addresses"
+    
+  - name: "Proper error handling in async functions"
+    pattern: "async.*=>.*{[^}]*(?!try)[^}]*await"
+    severity: "info"
+    files: "frontend/src/**/*.ts*"
+    message: "Consider adding try-catch blocks for async operations"
+    
+  - name: "MiniPay feeCurrency required"
+    pattern: "writeContract.*(?!feeCurrency)"
+    severity: "warning"
+    files: "frontend/src/**/*.ts*"
+    message: "Add feeCurrency parameter for MiniPay compatibility"
+
+# Hackathon Specific
+hackathon:
+  name: "Celo MiniPay Hackathon"
+  deadline: "2024-11-30"
+  categories:
+    - "Play-to-Earn Games"
+    - "Educational Games"
+    - "Prediction Markets"
+  
+  # Submission requirements
+  requirements:
+    - "DApp deployed on Celo"
+    - "Smart contracts verified"
+    - "Demo video (max 4 minutes)"
+    - "Comprehensive README"
+    - "MiniPay compatible"
+    
+  # Judging criteria
+  judging:
+    - criterion: "Innovation"
+      weight: 25
+    - criterion: "Impact"
+      weight: 25
+    - criterion: "Technical Depth"
+      weight: 20
+    - criterion: "User Experience"
+      weight: 20
+    - criterion: "Documentation"
+      weight: 10
+
+# Development Workflow
+workflow:
+  # Development steps
+  steps:
+    - name: "Smart Contract Development"
+      commands:
+        - "cd contracts && forge build"
+        - "cd contracts && forge test"
+        - "cd contracts && forge coverage"
+    
+    - name: "Frontend Development"
+      commands:
+        - "cd frontend && npm install"
+        - "cd frontend && npm run dev"
+        - "cd frontend && npm run build"
+    
+    - name: "Testing"
+      commands:
+        - "cd contracts && forge test -vvv"
+        - "cd frontend && npm test"
+    
+    - name: "Deployment"
+      commands:
+        - "cd contracts && forge script script/Deploy.s.sol --rpc-url alfajores --broadcast"
+        - "cd frontend && vercel --prod"
+  
+  # Environment setup
+  environment:
+    required:
+      - "Node.js >= 18"
+      - "Foundry"
+      - "Git"
+    optional:
+      - "ngrok (for MiniPay testing)"
+      - "Vercel CLI"
+
+# Metadata
+metadata:
+  created: "2024-11-19"
+  updated: "2024-11-19"
+  author: "Zali Team"
+  license: "MIT"
+  repository: "https://github.com/yourname/zali"
+  
+# Version Control
+version_control:
+  system: "git"
+  ignore_files:
+    - ".gitignore"
+    - "contracts/.gitignore"
+    - "frontend/.gitignore"
