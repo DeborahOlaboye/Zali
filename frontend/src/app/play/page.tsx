@@ -1,25 +1,94 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useTriviaGame, useAutoFaucet } from '@/hooks/useContract';
+import { formatEther } from 'viem';
+import { GameState } from '@/config/contracts';
 
 export default function PlayPage() {
   const { address } = useAccount();
   const router = useRouter();
+  const [isJoining, setIsJoining] = useState(false);
   
-  const handleStartPlaying = () => {
+  // Use game ID 1 for the featured game
+  const GAME_ID = 1;
+  const { 
+    gameInfo, 
+    gameState, 
+    prizePool, 
+    players, 
+    hasJoined,
+    joinGame,
+    joinIsLoading,
+    joinIsSuccess,
+  } = useTriviaGame(GAME_ID);
+  
+  const { 
+    needsClaim, 
+    hasClaimed, 
+    balance, 
+    autoClaimIfNeeded, 
+    claimIsLoading 
+  } = useAutoFaucet();
+  
+  // Handle join success
+  useEffect(() => {
+    if (joinIsSuccess && !isJoining) {
+      toast.success('Successfully joined the game!');
+      router.push(`/play/game?gameId=${GAME_ID}`);
+    }
+  }, [joinIsSuccess, router, isJoining, GAME_ID]);
+
+  const handleStartPlaying = async () => {
     if (!address) {
       toast.error('Please connect your wallet first');
       return;
     }
-    
-    // TODO: Check balance and auto-claim from faucet if needed
-    // TODO: Join game via smart contract
-    
-    router.push('/play/game?gameId=1');
+
+    setIsJoining(true);
+
+    try {
+      // Check if already joined
+      if (hasJoined) {
+        toast.success('You\'ve already joined! Starting game...');
+        router.push(`/play/game?gameId=${GAME_ID}`);
+        return;
+      }
+
+      // Auto-claim from faucet if needed
+      if (needsClaim && !hasClaimed) {
+        toast.loading('Getting you some cUSD from faucet...');
+        const claimed = await autoClaimIfNeeded();
+        if (claimed) {
+          toast.success('Received 10 cUSD! Now joining game...');
+          // Wait a bit for balance to update
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      // Check game state
+      if (gameState !== GameState.Open) {
+        toast.error('Game is not open for joining');
+        setIsJoining(false);
+        return;
+      }
+
+      // Join the game
+      toast.loading('Joining game...');
+      if (joinGame) {
+        await joinGame({
+          args: [BigInt(GAME_ID)],
+        });
+      }
+    } catch (error: any) {
+      console.error('Error joining game:', error);
+      toast.error(error?.message || 'Failed to join game');
+      setIsJoining(false);
+    }
   };
 
   return (
@@ -50,15 +119,21 @@ export default function PlayPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
                 <p className="text-sm text-gray-600 mb-1">💰 Prize Pool</p>
-                <p className="text-2xl font-bold text-green-600">2.5 cUSD</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {prizePool ? formatEther(prizePool) : '0'} cUSD
+                </p>
               </div>
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                 <p className="text-sm text-gray-600 mb-1">🎫 Entry Fee</p>
-                <p className="text-2xl font-bold text-blue-600">0.1 cUSD</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {gameInfo ? formatEther(gameInfo[2]) : '0.1'} cUSD
+                </p>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                <p className="text-sm text-gray-600 mb-1">❓ Questions</p>
-                <p className="text-2xl font-bold text-purple-600">5</p>
+                <p className="text-sm text-gray-600 mb-1">👥 Players</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {players?.length || 0}/{gameInfo ? Number(gameInfo[4]) : '10'}
+                </p>
               </div>
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
                 <p className="text-sm text-gray-600 mb-1">⏱️ Time</p>
@@ -69,15 +144,34 @@ export default function PlayPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
                 onClick={handleStartPlaying}
-                disabled={!address}
+                disabled={!address || joinIsLoading || claimIsLoading || isJoining}
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed min-w-[250px]"
               >
-                {address ? '🎮 Start Playing Now' : '🔌 Connect Wallet First'}
+                {!address 
+                  ? '🔌 Connect Wallet First'
+                  : joinIsLoading || claimIsLoading || isJoining
+                    ? '⏳ Processing...'
+                    : hasJoined
+                      ? '🎮 Continue Playing'
+                      : '🎮 Start Playing Now'
+                }
               </button>
               
               {!address && (
                 <p className="text-sm text-gray-500">
                   Connect your wallet to start playing
+                </p>
+              )}
+              
+              {address && needsClaim && !hasClaimed && (
+                <p className="text-sm text-blue-600 font-medium">
+                  🎉 You'll receive 10 free cUSD to start playing!
+                </p>
+              )}
+              
+              {address && balance !== undefined && (
+                <p className="text-sm text-gray-600">
+                  Your balance: {formatEther(balance)} cUSD
                 </p>
               )}
             </div>
