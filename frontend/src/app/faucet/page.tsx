@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { CONTRACTS } from '@/config/contracts';
-import Navbar from '@/components/Navbar';
 import { useFaucet } from '@/hooks/useContract';
 
 export default function FaucetPage() {
@@ -50,8 +49,6 @@ export default function FaucetPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Navbar />
-      
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">Celo Faucet</h1>
