@@ -1,0 +1,9 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 54.16s
+Compiler run successful!
+[2m2025-11-21T04:33:36.344573Z[0m [31mERROR[0m [2msharedbackend[0m[2m:[0m Failed to send/recv `storage` [3merr[0m[2m=[0mfailed to get storage for 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d at 111414077815863400510004064629973595961579173665589224203503662149373724987205: server returned an error response: error code -32000: missing trie node 9bf628a2e90df90e7129f1377e0c2c70e90372dbb0ce3dfb7d8ff25ebab18243 (path ) state 0x9bf628a2e90df90e7129f1377e0c2c70e90372dbb0ce3dfb7d8ff25ebab18243 is not available, data: {"trace_id":"51a9f5e6a7489d0b73a759cce47af04a"} [3maddress[0m[2m=[0m0x910f5dedFb88C85B1E50797CeCeac3182ecb212d [3mindex[0m[2m=[0m111414077815863400510004064629973595961579173665589224203503662149373724987205
+[2m2025-11-21T04:33:36.344620Z[0m [31mERROR[0m [2msharedbackend[0m[2m:[0m It looks like you're trying to fork from an older block with a non-archive node which is not supported. Please try to change your RPC url to an archive node if the issue persists.
+Error: EVM error
+
+Context:
+- database error: failed to get storage for 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d at 111414077815863400510004064629973595961579173665589224203503662149373724987205: server returned an error response: error code -32000: missing trie node 9bf628a2e90df90e7129f1377e0c2c70e90372dbb0ce3dfb7d8ff25ebab18243 (path ) state 0x9bf628a2e90df90e7129f1377e0c2c70e90372dbb0ce3dfb7d8ff25ebab18243 is not available, data: {"trace_id":"51a9f5e6a7489d0b73a759cce47af04a"}

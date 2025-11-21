@@ -1,4 +1,4 @@
-import { useContractRead, useContractWrite, useWaitForTransactionReceipt, useAccount, useBalance } from 'wagmi';
+import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount, useBalance } from 'wagmi';
 import { CONTRACTS, GAME_CONSTANTS } from '@/config/contracts';
 import { parseEther, formatEther } from 'viem';
 import { useState, useEffect } from 'react';
@@ -12,69 +12,67 @@ export function usePlayerRegistration() {
   const { address } = useAccount();
 
   // Check if player is registered
-  const { data: playerInfo, refetch: refetchPlayerInfo } = useContractRead({
+  const { data: playerInfo, refetch: refetchPlayerInfo } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getPlayerInfo',
     args: address ? [address] : undefined,
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    },
   });
-
-  // Check if username is available
-  const checkUsernameAvailability = async (username: string) => {
-    // This would need to be implemented as a contract read
-    return true; // Placeholder
-  };
 
   // Register username
   const {
-    write: registerUsername,
+    writeContract: registerUsername,
     data: registerData,
-    isLoading: registerIsLoading,
+    isPending: registerIsLoading,
     isError: registerIsError,
     error: registerError,
-  } = useContractWrite({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'registerUsername',
-  });
+  } = useWriteContract();
 
   // Update username (costs 0.01 CELO)
   const {
-    write: updateUsername,
+    writeContract: updateUsername,
     data: updateData,
-    isLoading: updateIsLoading,
+    isPending: updateIsLoading,
     isError: updateIsError,
-  } = useContractWrite({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'updateUsername',
-  });
+  } = useWriteContract();
 
   const { isSuccess: registerIsSuccess } = useWaitForTransactionReceipt({
-    hash: registerData?.hash,
+    hash: registerData,
   });
 
   const { isSuccess: updateIsSuccess } = useWaitForTransactionReceipt({
-    hash: updateData?.hash,
+    hash: updateData,
   });
 
-  const isRegistered = playerInfo ? (playerInfo as any)[6] : false; // isRegistered field
+  // Check if registered by checking if username exists (index 0)
+  const isRegistered = playerInfo ? !!(playerInfo as any)[0] && (playerInfo as any)[0].length > 0 : false;
 
   return {
     playerInfo,
     isRegistered,
-    registerUsername,
+    registerUsername: (username: string) => registerUsername({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'registerUsername',
+      args: [username],
+    }),
     registerIsLoading,
     registerIsSuccess,
     registerIsError,
     registerError,
-    updateUsername,
+    updateUsername: (username: string) => updateUsername({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'updateUsername',
+      args: [username],
+      value: parseEther('0.01'),
+    }),
     updateIsLoading,
     updateIsSuccess,
     updateIsError,
-    checkUsernameAvailability,
     refetchPlayerInfo,
   };
 }
@@ -86,57 +84,59 @@ export function useGameSession() {
   const { address } = useAccount();
 
   // Get player's session count
-  const { data: sessionCount } = useContractRead({
+  const { data: sessionCount } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getPlayerSessionCount',
     args: address ? [address] : undefined,
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    },
   });
 
   // Start a new game
   const {
-    write: startGame,
+    writeContract: startGame,
     data: startGameData,
-    isLoading: startGameIsLoading,
+    isPending: startGameIsLoading,
     isError: startGameIsError,
     error: startGameError,
-  } = useContractWrite({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'startGame',
-  });
+  } = useWriteContract();
 
   const { isSuccess: startGameIsSuccess } = useWaitForTransactionReceipt({
-    hash: startGameData?.hash,
+    hash: startGameData,
   });
 
   // Submit answers
   const {
-    write: submitAnswers,
+    writeContract: submitAnswers,
     data: submitData,
-    isLoading: submitIsLoading,
+    isPending: submitIsLoading,
     isError: submitIsError,
     error: submitError,
-  } = useContractWrite({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'submitAnswers',
-  });
+  } = useWriteContract();
 
   const { isSuccess: submitIsSuccess } = useWaitForTransactionReceipt({
-    hash: submitData?.hash,
+    hash: submitData,
   });
 
   return {
     sessionCount: sessionCount ? Number(sessionCount) : 0,
-    startGame,
+    startGame: () => startGame({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'startGame',
+    }),
     startGameIsLoading,
     startGameIsSuccess,
     startGameIsError,
     startGameError,
-    submitAnswers,
+    submitAnswers: (sessionId: bigint, answers: number[]) => submitAnswers({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'submitAnswers',
+      args: [sessionId, answers],
+    }),
     submitIsLoading,
     submitIsSuccess,
     submitIsError,
@@ -150,13 +150,14 @@ export function useGameSession() {
 export function useSession(sessionId?: number) {
   const { address } = useAccount();
 
-  const { data: sessionData, refetch: refetchSession } = useContractRead({
+  const { data: sessionData, refetch: refetchSession } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getSession',
     args: address && sessionId !== undefined ? [address, BigInt(sessionId)] : undefined,
-    enabled: !!address && sessionId !== undefined,
-    watch: true,
+    query: {
+      enabled: !!address && sessionId !== undefined,
+    },
   });
 
   return {
@@ -198,66 +199,69 @@ export function useRewards() {
   const { address } = useAccount();
 
   // Get pending rewards
-  const { data: pendingRewards, refetch: refetchPendingRewards } = useContractRead({
+  const { data: pendingRewards, refetch: refetchPendingRewards } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getPendingRewards',
     args: address ? [address] : undefined,
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    },
   });
 
   // Get unclaimed sessions
-  const { data: unclaimedSessions } = useContractRead({
+  const { data: unclaimedSessions } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getUnclaimedSessions',
     args: address ? [address] : undefined,
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    },
   });
 
   // Claim all rewards
   const {
-    write: claimRewards,
+    writeContract: claimRewards,
     data: claimData,
-    isLoading: claimIsLoading,
+    isPending: claimIsLoading,
     isError: claimIsError,
     error: claimError,
-  } = useContractWrite({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'claimRewards',
-  });
+  } = useWriteContract();
 
   // Claim specific session rewards
   const {
-    write: claimSessionRewards,
+    writeContract: claimSessionRewards,
     data: claimSessionData,
-    isLoading: claimSessionIsLoading,
-  } = useContractWrite({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'claimSessionRewards',
-  });
+    isPending: claimSessionIsLoading,
+  } = useWriteContract();
 
   const { isSuccess: claimIsSuccess } = useWaitForTransactionReceipt({
-    hash: claimData?.hash,
+    hash: claimData,
   });
 
   const { isSuccess: claimSessionIsSuccess } = useWaitForTransactionReceipt({
-    hash: claimSessionData?.hash,
+    hash: claimSessionData,
   });
 
   return {
     pendingRewards: pendingRewards ? formatEther(pendingRewards as bigint) : '0',
     unclaimedSessions: unclaimedSessions as bigint[] || [],
-    claimRewards,
+    claimRewards: () => claimRewards({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'claimRewards',
+    }),
     claimIsLoading,
     claimIsSuccess,
     claimIsError,
     claimError,
-    claimSessionRewards,
+    claimSessionRewards: (sessionId: bigint) => claimSessionRewards({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'claimSessionRewards',
+      args: [sessionId],
+    }),
     claimSessionIsLoading,
     claimSessionIsSuccess,
     refetchPendingRewards,
@@ -268,12 +272,11 @@ export function useRewards() {
  * Hook for leaderboard
  */
 export function useLeaderboard(count: number = 10) {
-  const { data: leaderboardData, refetch: refetchLeaderboard } = useContractRead({
+  const { data: leaderboardData, refetch: refetchLeaderboard } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getLeaderboard',
     args: [BigInt(count)],
-    watch: true,
   });
 
   return {
@@ -287,19 +290,17 @@ export function useLeaderboard(count: number = 10) {
  */
 export function useContractInfo() {
   // Get total questions
-  const { data: questionCount } = useContractRead({
+  const { data: questionCount } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getQuestionCount',
-    watch: true,
   });
 
   // Get contract balance
-  const { data: contractBalance } = useContractRead({
+  const { data: contractBalance } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getContractBalance',
-    watch: true,
   });
 
   return {
@@ -316,7 +317,6 @@ export function useCeloBalance() {
 
   const { data: balance, refetch: refetchBalance } = useBalance({
     address: address as `0x${string}`,
-    watch: true,
   });
 
   return {
@@ -332,37 +332,39 @@ export function useCeloBalance() {
 export function useFaucet() {
   const { address } = useAccount();
   
-  const { data: hasClaimed } = useContractRead({
+  const { data: hasClaimed } = useReadContract({
     address: CONTRACTS.faucet.address,
     abi: CONTRACTS.faucet.abi,
     functionName: 'hasClaimed',
     args: address ? [address] : undefined,
-    enabled: !!address,
+    query: {
+      enabled: !!address,
+    },
   });
 
-  const { data: contractBalance } = useContractRead({
+  const { data: contractBalance } = useReadContract({
     address: CONTRACTS.faucet.address,
     abi: CONTRACTS.faucet.abi,
     functionName: 'getContractBalance',
   });
 
   const { 
-    write: claim, 
+    writeContract: claim, 
     data: claimData, 
-    isLoading: claimIsLoading,
+    isPending: claimIsLoading,
     isError: claimIsError,
-  } = useContractWrite({
-    address: CONTRACTS.faucet.address,
-    abi: CONTRACTS.faucet.abi,
-    functionName: 'claim',
-  });
+  } = useWriteContract();
 
   const { isSuccess: claimIsSuccess } = useWaitForTransactionReceipt({
-    hash: claimData?.hash,
+    hash: claimData,
   });
 
   return {
-    claim,
+    claim: () => claim({
+      address: CONTRACTS.faucet.address,
+      abi: CONTRACTS.faucet.abi,
+      functionName: 'claim',
+    }),
     claimIsLoading,
     claimIsSuccess,
     claimIsError,

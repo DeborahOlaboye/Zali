@@ -1,0 +1,65 @@
+Compiling 2 files with Solc 0.8.24
+Solc 0.8.24 finished in 18.72s
+Compiler run successful!
+Script ran successfully.
+
+== Logs ==
+  ===========================================
+  Redeploying with Fixed MockVRF...
+  ===========================================
+  
+  Step 1: Deploying Improved MockVRFCoordinatorV2...
+  MockVRFCoordinatorV2: 0x31cb24Ef2d0e029eB7bfd297D6fFb8065130c2E0
+  
+  Step 2: Deploying TriviaGameV2...
+  TriviaGameV2 deployed: 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d
+  
+  ===========================================
+  DEPLOYMENT COMPLETE!
+  ===========================================
+  
+  Contract Addresses:
+  -------------------
+  MockVRFCoordinatorV2: 0x31cb24Ef2d0e029eB7bfd297D6fFb8065130c2E0
+  TriviaGameV2: 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d
+  
+  ===========================================
+  NEXT STEPS:
+  ===========================================
+  1. Update frontend .env.local:
+     NEXT_PUBLIC_TRIVIA_GAME_V2_ADDRESS= 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d
+     NEXT_PUBLIC_MOCK_VRF_ADDRESS= 0x31cb24Ef2d0e029eB7bfd297D6fFb8065130c2E0
+  
+  2. Fund contract with CELO:
+     cast send 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d --value 1ether
+  
+  3. Add questions:
+     TRIVIA_GAME_V2_ADDRESS= 0x910f5dedFb88C85B1E50797CeCeac3182ecb212d
+     forge script script/AddQuestions.s.sol --broadcast
+  
+  4. Test start game - should work now!
+  ===========================================
+
+## Setting up 1 EVM.
+
+==========================
+
+Chain 11142220
+
+Estimated gas price: 25.001 gwei
+
+Estimated total gas used for script: 5981107
+
+Estimated amount required: 0.149533656107 CELO
+
+==========================
+
+
+==========================
+
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+
+Transactions saved to: /home/debby/Desktop/DEBY/Hacks/Zali/contracts/broadcast/RedeployWithFixedMockVRF.s.sol/11142220/run-latest.json
+
+Sensitive values saved to: /home/debby/Desktop/DEBY/Hacks/Zali/contracts/cache/RedeployWithFixedMockVRF.s.sol/11142220/run-latest.json
+
