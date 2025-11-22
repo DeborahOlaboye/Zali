@@ -21,6 +21,29 @@ export default function RewardsPage() {
     claimError,
     refetchPendingRewards,
   } = useRewards();
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Rewards Debug:', {
+      address,
+      isConnected,
+      isRegistered,
+      pendingRewards,
+      unclaimedSessions: unclaimedSessions?.length || 0,
+      playerInfo
+    });
+  }, [address, isConnected, isRegistered, pendingRewards, unclaimedSessions, playerInfo]);
+
+  // Auto-refresh data every 10 seconds
+  useEffect(() => {
+    if (isConnected && isRegistered) {
+      const interval = setInterval(() => {
+        refetchPendingRewards();
+        refetchBalance();
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isConnected, isRegistered, refetchPendingRewards, refetchBalance]);
   const { balance, refetchBalance } = useCeloBalance();
 
   // Handle claim success
@@ -111,9 +134,19 @@ export default function RewardsPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Your Rewards
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-lg mb-4">
             Claim your earned CELO rewards
           </p>
+          <button
+            onClick={() => {
+              refetchPendingRewards();
+              refetchBalance();
+              toast.success('Data refreshed!');
+            }}
+            className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm transition-colors"
+          >
+            🔄 Refresh Data
+          </button>
         </motion.div>
 
         {/* User Info */}

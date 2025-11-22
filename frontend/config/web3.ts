@@ -13,20 +13,22 @@ const wagmiAdapter = new WagmiAdapter({
 })
 
 // 3. Configure the modal
-createAppKit({
-  adapters: [wagmiAdapter],
-  networks: [celoSepolia, celo],
-  projectId,
-  metadata: {
-    name: 'Celo Knowledge Quest',
-    description: 'Test your Celo knowledge and earn CELO rewards',
-    url: 'https://celoquest.app',
-    icons: ['https://celoquest.app/icon.png']
-  },
-  features: {
-    analytics: true
-  }
-})
+if (typeof window !== 'undefined') {
+  createAppKit({
+    adapters: [wagmiAdapter],
+    networks: [celoSepolia, celo],
+    projectId,
+    metadata: {
+      name: 'Celo Knowledge Quest',
+      description: 'Test your Celo knowledge and earn CELO rewards',
+      url: 'https://celoquest.app',
+      icons: ['https://celoquest.app/icon.png']
+    },
+    features: {
+      analytics: false
+    }
+  })
+}
 
 export const config = wagmiAdapter.wagmiConfig
 

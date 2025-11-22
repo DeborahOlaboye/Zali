@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useState, useEffect } from 'react';
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
 import toast from 'react-hot-toast';
 
 const MOCK_VRF_ADDRESS = '0x20E8706C5B1e15329Eb7690d79a5E5668DD5525C' as const;
@@ -25,6 +25,37 @@ const MOCK_VRF_ABI = [
 
 export default function VRFFulfillment() {
   const [isVisible, setIsVisible] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // Check pending VRF requests
+  const { data: pendingRequestCount, refetch: refetchPendingCount } = useReadContract({
+    address: MOCK_VRF_ADDRESS,
+    abi: MOCK_VRF_ABI,
+    functionName: 'getPendingRequestCount',
+  });
+
+  // Auto-check for pending requests every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchPendingCount();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [refetchPendingCount]);
+
+  // Update pending count
+  useEffect(() => {
+    if (pendingRequestCount) {
+      const count = Number(pendingRequestCount);
+      setPendingCount(count);
+      if (count > 0 && !isVisible) {
+        setIsVisible(true);
+        toast('🎲 VRF requests need fulfillment for your games!', {
+          duration: 5000,
+          icon: '🎲'
+        });
+      }
+    }
+  }, [pendingRequestCount, isVisible]);
 
   const {
     writeContract: fulfillVRF,
@@ -54,11 +85,14 @@ export default function VRFFulfillment() {
   };
 
   // Handle success
-  if (fulfillIsSuccess) {
-    toast.dismiss();
-    toast.success('VRF requests fulfilled! Your game should be ready now.');
-    setIsVisible(false);
-  }
+  useEffect(() => {
+    if (fulfillIsSuccess) {
+      toast.dismiss();
+      toast.success('VRF requests fulfilled! Your games are now ready.');
+      setIsVisible(false);
+      refetchPendingCount();
+    }
+  }, [fulfillIsSuccess, refetchPendingCount]);
 
   // Handle error
   if (fulfillError) {
@@ -66,13 +100,21 @@ export default function VRFFulfillment() {
     toast.error('Failed to fulfill VRF requests');
   }
 
+  if (!isVisible && pendingCount === 0) {
+    return null;
+  }
+
   if (!isVisible) {
     return (
       <button
         onClick={() => setIsVisible(true)}
-        className="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm shadow-lg transition-all"
+        className={`fixed bottom-4 right-4 text-white px-4 py-2 rounded-lg text-sm shadow-lg transition-all ${
+          pendingCount > 0 
+            ? 'bg-orange-600 hover:bg-orange-700 animate-pulse' 
+            : 'bg-blue-600 hover:bg-blue-700'
+        }`}
       >
-        🎲 VRF Helper
+        🎲 {pendingCount > 0 ? `${pendingCount} Games Waiting` : 'VRF Helper'}
       </button>
     );
   }
@@ -90,7 +132,10 @@ export default function VRFFulfillment() {
       </div>
       
       <p className="text-sm text-gray-600 mb-3">
-        If your game is stuck after clicking "Start Playing", click below to fulfill VRF requests:
+        {pendingCount > 0 
+          ? `You have ${pendingCount} games waiting for questions. Click below to complete them:`
+          : 'If your game is stuck after clicking "Start Playing", click below to fulfill VRF requests:'
+        }
       </p>
       
       <button

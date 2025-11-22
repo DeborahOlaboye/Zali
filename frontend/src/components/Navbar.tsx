@@ -13,10 +13,10 @@ export default function Navbar() {
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
 
-  // Simplified navigation per strategy - removed "Create Game" and "Faucet"
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Play', href: '/play' },
+    { name: 'Rewards', href: '/rewards' },
   ];
 
   return (

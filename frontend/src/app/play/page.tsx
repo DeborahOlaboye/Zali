@@ -124,6 +124,14 @@ export default function PlayPage() {
                 </div>
               </div>
             </div>
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => router.push('/rewards')}
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all"
+              >
+                💰 View & Claim Rewards
+              </button>
+            </div>
           </motion.div>
         )}
 
