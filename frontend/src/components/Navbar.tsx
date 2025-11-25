@@ -34,6 +34,7 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Play', href: '/play' },
     { name: 'Rewards', href: '/rewards' },
+    { name: 'Leaderboard', href: '/leaderboard' },
   ];
 
   return (

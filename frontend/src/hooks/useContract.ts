@@ -242,12 +242,15 @@ export function useRewards() {
     claimIsSuccess,
     claimIsError,
     claimError,
-    claimSessionRewards: (sessionId: bigint) => claimSessionRewards({
-      address: CONTRACTS.triviaGameV2.address,
-      abi: CONTRACTS.triviaGameV2.abi,
-      functionName: 'claimSessionRewards',
-      args: [sessionId],
-    }),
+    claimSessionRewards: (sessionIds: bigint[]) => {
+      const tx = {
+        address: CONTRACTS.triviaGameV2.address,
+        abi: CONTRACTS.triviaGameV2.abi,
+        functionName: 'claimSessionRewards',
+        args: [sessionIds],
+      };
+      return claimSessionRewards(tx);
+    },
     claimSessionIsLoading,
     claimSessionIsSuccess,
     refetchPendingRewards,
