@@ -7,8 +7,6 @@ import { useLeaderboard } from '@/hooks/useContract';
 
 export default function LeaderboardPage() {
   const { isConnected } = useAccount();
-  const { leaderboardData } = useLeaderboard(10);
-
   const { leaderboardData, refetchLeaderboard } = useLeaderboard(10);
 
   return (

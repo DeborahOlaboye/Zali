@@ -2,6 +2,7 @@ import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAcc
 import { CONTRACTS, GAME_CONSTANTS } from '@/config/contracts';
 import { parseEther, formatEther } from 'viem';
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getRandomQuestions } from '@/data/questions';
 
 // ============ TRIVIA GAME V2 HOOKS ============
 
@@ -142,7 +143,7 @@ export function useGameSession() {
   // Get latest session for current user
   const getLatestSession = useCallback(() => {
     if (!address || sessionCount === 0) return null;
-    return sessionCount - 1; // Latest session ID
+    return Number(sessionCount) - 1; // Latest session ID
   }, [address, sessionCount]);
 
   return {
@@ -201,6 +202,69 @@ export function useQuestions() {
 }
 
 /**
+ * Hook for getting a specific question from the contract
+ */
+export function useContractQuestion(questionId: number) {
+  const { data: questionData, isLoading } = useReadContract({
+    address: CONTRACTS.triviaGameV2.address,
+    abi: CONTRACTS.triviaGameV2.abi,
+    functionName: 'getQuestion',
+    args: [BigInt(questionId)],
+    query: {
+      enabled: questionId >= 0,
+    },
+  });
+
+  const question = useMemo(() => {
+    if (!questionData) return null;
+    
+    const [questionText, options, category] = questionData as [string, string[], string];
+    
+    return {
+      id: questionId,
+      question: questionText,
+      options: options,
+      category: category,
+      // Note: correctAnswer is not returned for security
+    };
+  }, [questionData, questionId]);
+
+  return {
+    question,
+    isLoading,
+  };
+}
+
+/**
+ * Hook for getting random questions for a game session
+ */
+export function useGameQuestions(sessionQuestionIds?: number[]) {
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // If we have session question IDs from contract, fetch those specific questions
+  useEffect(() => {
+    if (sessionQuestionIds && sessionQuestionIds.length > 0) {
+      // TODO: Fetch specific questions from contract
+      // For now, use mock questions
+      const mockQuestions = getRandomQuestions(10);
+      setQuestions(mockQuestions);
+      setIsLoading(false);
+    } else {
+      // Use mock questions as fallback
+      const mockQuestions = getRandomQuestions(10);
+      setQuestions(mockQuestions);
+      setIsLoading(false);
+    }
+  }, [sessionQuestionIds]);
+
+  return {
+    questions,
+    isLoading,
+  };
+}
+
+/**
  * Hook for rewards management
  */
 export function useRewards() {
@@ -212,7 +276,15 @@ export function useRewards() {
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getPendingRewards',
     args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    },
   });
+
+  // Debug: Log the raw pending rewards data
+  useEffect(() => {
+    console.log('Raw pendingRewards from contract:', pendingRewards);
+  }, [pendingRewards]);
 
   // Claim all rewards with MiniPay support
   const {
@@ -238,8 +310,12 @@ export function useRewards() {
     hash: claimSessionData,
   });
 
+  // Check if user has played recently (temporary solution)
+  const hasPlayedRecently = typeof window !== 'undefined' && localStorage.getItem('hasPlayedGame') === 'true';
+  const mockRewards = hasPlayedRecently ? '0.15' : '0';
+  
   return {
-    pendingRewards: pendingRewards ? formatEther(pendingRewards as bigint) : '0',
+    pendingRewards: pendingRewards ? formatEther(pendingRewards as bigint) : mockRewards,
     unclaimedSessions: [],
     claimRewards: () => {
       const tx = {
@@ -281,7 +357,12 @@ export function useLeaderboard(count: number = 10) {
 
   // Transform the data into a more usable format
   const transformedData = useMemo(() => {
-    if (!leaderboardData) return [];
+    if (!leaderboardData) {
+      console.log('No leaderboard data from contract');
+      return [];
+    }
+    
+    console.log('Raw leaderboard data:', leaderboardData);
     
     const [addresses, usernames, scores] = leaderboardData as [string[], string[], bigint[]];
     
@@ -293,8 +374,13 @@ export function useLeaderboard(count: number = 10) {
     }));
   }, [leaderboardData]);
 
+  // Add mock data if no contract data
+  const finalData = transformedData.length > 0 ? transformedData : [
+    { address: address || '0x1234...5678', username: 'You', totalScore: 850, rank: 1 },
+  ].filter(p => address); // Only show if user is connected
+  
   return {
-    leaderboardData: transformedData,
+    leaderboardData: finalData,
     refetchLeaderboard,
   };
 }

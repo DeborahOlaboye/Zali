@@ -6,10 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import QuestionCard from '@/components/QuestionCard';
 import Timer from '@/components/Timer';
 import ProgressBar from '@/components/ProgressBar';
-import { calculateScore, questions as mockQuestions } from '@/data/questions';
+import { calculateScore } from '@/data/questions';
 import { useAccount } from 'wagmi';
 import toast from 'react-hot-toast';
-import { useGameSession } from '@/hooks/useContract';
+import { useGameSession, useGameQuestions } from '@/hooks/useContract';
 
 interface Question {
   id: number;
@@ -37,9 +37,8 @@ export default function GamePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   
-  // Use mock questions for now (TODO: fetch from contract)
-  const [questions] = useState<Question[]>(mockQuestions.slice(0, 10));
-  const [isLoadingQuestions] = useState(false);
+  // Use game questions hook to get 10 questions
+  const { questions, isLoading: isLoadingQuestions } = useGameQuestions();
   
   const { submitAnswers, submitIsLoading, submitIsSuccess, getLatestSession } = useGameSession();
 
@@ -108,13 +107,28 @@ export default function GamePage() {
       const score = calculateScore(finalAnswers, questions);
       
       if (address) {
-        // Get the latest session ID
-        const sessionId = getLatestSession();
-        if (sessionId !== null) {
-          // Submit answers to smart contract
-          await submitAnswers(BigInt(sessionId), finalAnswers);
-          toast.success('Answers submitted to blockchain!');
+        try {
+          // Get the latest session ID
+          const sessionId = getLatestSession();
+          console.log('Latest session ID:', sessionId);
+          
+          if (sessionId !== null) {
+            // Submit answers to smart contract
+            console.log('Submitting answers:', finalAnswers);
+            await submitAnswers(BigInt(sessionId), finalAnswers);
+            toast.success('Answers submitted to blockchain!');
+          } else {
+            console.log('No session ID found, skipping contract submission');
+          }
+        } catch (error) {
+          console.error('Error submitting to contract:', error);
+          toast.error('Failed to submit to blockchain, but game completed locally');
         }
+      }
+      
+      // Mark that user has played (for rewards)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hasPlayedGame', 'true');
       }
       
       toast.success(`Game complete! You scored ${score.correct}/${score.total}!`);

@@ -78,6 +78,51 @@ export const questions: Question[] = [
     explanation: "Your private key or seed phrase gives complete access to your wallet. Never share it with anyone - legitimate services will NEVER ask for it.",
     category: "Blockchain Security",
     difficulty: "easy"
+  },
+  {
+    id: 6,
+    question: "What consensus mechanism does Celo use?",
+    options: ["Proof of Work", "Proof of Stake", "Delegated Proof of Stake", "Proof of Authority"],
+    correctAnswer: 1,
+    explanation: "Celo uses Proof of Stake consensus, making it more energy-efficient than Proof of Work blockchains.",
+    category: "Celo Basics",
+    difficulty: "medium"
+  },
+  {
+    id: 7,
+    question: "What is the purpose of CELO tokens?",
+    options: ["Only for payments", "Governance and staking", "Mining rewards", "NFT creation"],
+    correctAnswer: 1,
+    explanation: "CELO tokens are used for governance voting and staking to secure the network.",
+    category: "Celo Basics",
+    difficulty: "medium"
+  },
+  {
+    id: 8,
+    question: "Which mobile wallet is optimized for Celo?",
+    options: ["MetaMask", "Trust Wallet", "MiniPay", "Coinbase Wallet"],
+    correctAnswer: 2,
+    explanation: "MiniPay is specifically designed for Celo and integrated into Opera Mini browser.",
+    category: "Celo Ecosystem",
+    difficulty: "easy"
+  },
+  {
+    id: 9,
+    question: "What is a key benefit of using stablecoins for gas fees?",
+    options: ["Higher transaction speed", "Predictable costs", "Lower security", "More complexity"],
+    correctAnswer: 1,
+    explanation: "Using stablecoins for gas fees provides predictable transaction costs, unlike volatile cryptocurrencies.",
+    category: "DeFi Concepts",
+    difficulty: "easy"
+  },
+  {
+    id: 10,
+    question: "What should you do before connecting to a new dApp?",
+    options: ["Share your private key", "Verify the URL and reputation", "Send test funds first", "Download random software"],
+    correctAnswer: 1,
+    explanation: "Always verify the URL and check the dApp's reputation before connecting your wallet to avoid scams.",
+    category: "Blockchain Security",
+    difficulty: "easy"
   }
 ];
 
@@ -86,7 +131,7 @@ export const questions: Question[] = [
  * @param count Number of questions to return
  * @returns Array of random questions
  */
-export function getRandomQuestions(count: number = 5): Question[] {
+export function getRandomQuestions(count: number = 10): Question[] {
   const shuffled = [...questions].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, questions.length));
 }
