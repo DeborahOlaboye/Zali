@@ -23,6 +23,16 @@ export default function QuestionCard({
 }: QuestionCardProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+  // Safety check for undefined question
+  if (!question) {
+    return (
+      <div className="w-full max-w-3xl mx-auto p-8 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading question...</p>
+      </div>
+    );
+  }
+
   const handleSelect = (index: number) => {
     if (disabled || selectedIndex !== null) return;
     

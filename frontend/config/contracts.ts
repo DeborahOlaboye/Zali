@@ -37,7 +37,11 @@ export const CONTRACTS = {
     abi: FAUCET_ABI,
   },
   triviaGame: {
-    address: '0x90C9Ba691DA6a027bf8cC173ea5171c29b3f3673' as `0x${string}`,
+    address: '0xc4AE01295cfAE3DA96b044F1a4284A93837a644C' as `0x${string}`,
+    abi: TRIVIA_GAME_ABI,
+  },
+  triviaGameV2: {
+    address: '0xc4AE01295cfAE3DA96b044F1a4284A93837a644C' as `0x${string}`,
     abi: TRIVIA_GAME_ABI,
   },
   cUSD: {

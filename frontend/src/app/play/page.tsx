@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { usePlayerRegistration, useGameSession, useCeloBalance, useContractInfo } from '@/hooks/useContract';
+import { usePlayerRegistration, useGameSession, useCeloBalance, useContractInfo, useQuestions } from '@/hooks/useContract';
 import { GAME_CONSTANTS } from '@/config/contracts';
 import VRFFulfillment from '@/components/VRFFulfillment';
 
@@ -24,7 +24,8 @@ export default function PlayPage() {
   }, [address, refetchPlayerInfo]);
   const { startGame, startGameIsLoading, startGameIsSuccess, startGameError } = useGameSession();
   const { balance } = useCeloBalance();
-  const { questionCount, contractBalance } = useContractInfo();
+  const { questionCount } = useQuestions();
+  const { contractBalance } = useContractInfo();
 
   // Redirect to game on successful start
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function PlayPage() {
 
     // Check if enough questions
     if (questionCount < GAME_CONSTANTS.QUESTIONS_PER_SESSION) {
-      toast.error(`Not enough questions available. Need at least ${GAME_CONSTANTS.QUESTIONS_PER_SESSION}.`);
+      toast.error(`Not enough questions available. Need at least ${GAME_CONSTANTS.QUESTIONS_PER_SESSION}, found ${questionCount}.`);
       return;
     }
 

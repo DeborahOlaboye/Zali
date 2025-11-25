@@ -6,10 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import QuestionCard from '@/components/QuestionCard';
 import Timer from '@/components/Timer';
 import ProgressBar from '@/components/ProgressBar';
-import { calculateScore } from '@/data/questions';
+import { calculateScore, questions as mockQuestions } from '@/data/questions';
 import { useAccount } from 'wagmi';
 import toast from 'react-hot-toast';
-import { useQuestions } from '@/hooks/useContract';
 
 interface Question {
   id: number;
@@ -37,38 +36,17 @@ export default function GamePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   
-  // Fetch questions from the smart contract
-  const { data: questionIds, isLoading: isLoadingQuestions } = useQuestions();
-  const [questions, setQuestions] = useState<Question[]>([]);
+  // Use mock questions for now (TODO: fetch from contract)
+  const [questions] = useState<Question[]>(mockQuestions.slice(0, 5));
+  const [isLoadingQuestions] = useState(false);
 
-  // Map the question data from the contract to our Question type
-  useEffect(() => {
-    if (questionIds && questionIds.length > 0) {
-      // For now, we'll use a placeholder since we need to implement the actual question fetching
-      // This will be updated once we have the contract's getQuestion function available
-      const mappedQuestions = questionIds.map((id, index) => ({
-        id: Number(id),
-        question: `Question ${index + 1} from contract`,
-        options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
-        correctAnswer: 0, // This should come from the contract
-        explanation: 'Explanation will be shown after answering',
-        category: 'Blockchain',
-        difficulty: 'medium' as const,
-      }));
-      setQuestions(mappedQuestions);
-    }
-  }, [questionIds]);
-
-  // Redirect if not connected or if there's an error loading questions
+  // Redirect if not connected
   useEffect(() => {
     if (!isConnected) {
       toast.error('Please connect your wallet first');
       router.push('/play');
-    } else if (questionIds && questionIds.length === 0) {
-      toast.error('No questions available. Please try again later.');
-      router.push('/play');
     }
-  }, [isConnected, router, questionIds]);
+  }, [isConnected, router]);
 
   // Start game
   useEffect(() => {

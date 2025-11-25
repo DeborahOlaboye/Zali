@@ -13,7 +13,7 @@ export interface Question {
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
-export const SAMPLE_QUESTIONS: Question[] = [
+export const questions: Question[] = [
   {
     id: 1,
     question: "What is Celo's native stablecoin pegged to the US Dollar?",
@@ -87,9 +87,12 @@ export const SAMPLE_QUESTIONS: Question[] = [
  * @returns Array of random questions
  */
 export function getRandomQuestions(count: number = 5): Question[] {
-  const shuffled = [...SAMPLE_QUESTIONS].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(count, SAMPLE_QUESTIONS.length));
+  const shuffled = [...questions].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, questions.length));
 }
+
+// Keep backward compatibility
+export const SAMPLE_QUESTIONS = questions;
 
 /**
  * Calculate score based on answers

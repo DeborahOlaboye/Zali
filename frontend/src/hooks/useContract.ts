@@ -180,49 +180,16 @@ export function useSession(sessionId?: number) {
  * Hook for getting questions from the smart contract
  */
 export function useQuestions() {
-  // First, get the total number of questions
+  // Get the total number of questions
   const { data: questionCount, isLoading: isLoadingCount } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getQuestionCount',
   });
 
-  // Generate an array of question indices to fetch
-  const questionIndices = Array.from(
-    { length: Number(questionCount || 0) },
-    (_, i) => BigInt(i)
-  );
-
-  // Then fetch all questions in parallel
-  const { data: questionsData, isLoading: isLoadingQuestions } = useReadContract({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'getQuestion',
-    args: [questionIndices],
-    query: {
-      enabled: !!questionCount && questionCount > 0,
-    },
-  });
-
-  // Transform the contract data into our Question type
-  const questions = useMemo(() => {
-    if (!questionsData) return [];
-    
-    return questionsData.map((q: any, index: number) => ({
-      id: Number(questionIndices[index]) + 1, // Convert to 1-based index
-      question: q.question || `Question ${index + 1}`,
-      options: q.options || ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
-      correctAnswer: q.correctOptionIndex !== undefined ? Number(q.correctOptionIndex) : 0,
-      explanation: q.explanation || 'No explanation provided',
-      category: q.category || 'General Knowledge',
-      difficulty: (q.difficulty?.toLowerCase() || 'medium') as 'easy' | 'medium' | 'hard',
-    }));
-  }, [questionsData, questionIndices]);
-
   return {
-    data: questions,
-    isLoading: isLoadingCount || isLoadingQuestions,
-    questionIds: questionIndices.map(id => id + 1n), // Return 1-based IDs
+    questionCount: questionCount ? Number(questionCount) : 0,
+    isLoading: isLoadingCount,
   };
 }
 
@@ -238,6 +205,19 @@ export function useRewards() {
     abi: CONTRACTS.triviaGameV2.abi,
     functionName: 'getPendingRewards',
     args: address ? [address] : undefined,
+  });
+
+  // Claim all rewards
+  const {
+    writeContract: claimRewards,
+    data: claimData,
+    isPending: claimIsLoading,
+    isError: claimIsError,
+    error: claimError,
+  } = useWriteContract();
+
+  const { isSuccess: claimIsSuccess } = useWaitForTransactionReceipt({
+    hash: claimData,
   });
 
   // Claim specific session rewards
@@ -296,13 +276,6 @@ export function useLeaderboard(count: number = 10) {
  * Hook for contract info
  */
 export function useContractInfo() {
-  // Get total questions
-  const { data: questionCount } = useReadContract({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'getQuestionCount',
-  });
-
   // Get contract balance
   const { data: contractBalance } = useReadContract({
     address: CONTRACTS.triviaGameV2.address,
@@ -311,7 +284,6 @@ export function useContractInfo() {
   });
 
   return {
-    questionCount: questionCount ? Number(questionCount) : 0,
     contractBalance: contractBalance ? formatEther(contractBalance as bigint) : '0',
   };
 }
