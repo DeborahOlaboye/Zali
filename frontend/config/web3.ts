@@ -3,7 +3,7 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { celoSepolia, celo } from '@reown/appkit/networks'
 
 // 1. Get projectId from https://cloud.reown.com
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'c4f79cc821944d9680842e34466bfbd'
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id'
 
 // 2. Set up Wagmi adapter
 const wagmiAdapter = new WagmiAdapter({
@@ -24,7 +24,9 @@ createAppKit({
     icons: ['https://celoquest.app/icon.png']
   },
   features: {
-    analytics: false
+    analytics: false,
+    email: false,
+    socials: []
   }
 })
 

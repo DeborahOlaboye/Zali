@@ -216,6 +216,10 @@ export function useRewards() {
     error: claimError,
   } = useWriteContract();
 
+  const { isSuccess: claimIsSuccess } = useWaitForTransactionReceipt({
+    hash: claimData,
+  });
+
   // Claim specific session rewards
   const {
     writeContract: claimSessionRewards,
