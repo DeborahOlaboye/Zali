@@ -55,9 +55,9 @@ export function usePlayerRegistration() {
     if (!playerInfo) return false;
     const username = (playerInfo as any)[0];
     const result = !!(username && username.length > 0);
-    console.log('Registration check:', { playerInfo, username, isRegistered: result });
+    console.log('Registration check:', { address, playerInfo, username, isRegistered: result });
     return result;
-  }, [playerInfo]);
+  }, [playerInfo, address]);
 
   return {
     playerInfo,
@@ -130,22 +130,50 @@ export function useGameSession() {
   });
 
   // Memoize the startGame function to prevent recreation on every render
-  const memoizedStartGame = useCallback(() => {
-    return startGame({
+  const memoizedStartGame = useCallback(async () => {
+    const result = startGame({
       address: CONTRACTS.triviaGameV2.address,
       abi: CONTRACTS.triviaGameV2.abi,
       functionName: 'startGame',
     });
+    
+    // Auto-fulfill VRF after a short delay
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/api/fulfill-vrf', { method: 'POST' });
+        if (response.ok) {
+          console.log('VRF auto-fulfilled');
+        }
+      } catch (error) {
+        console.warn('Auto VRF fulfillment failed:', error);
+      }
+    }, 5000);
+    
+    return result;
   }, [startGame]);
 
   // Memoize the submitAnswers function
-  const memoizedSubmitAnswers = useCallback((sessionId: bigint, answers: number[]) => {
-    return submitAnswers({
+  const memoizedSubmitAnswers = useCallback(async (sessionId: bigint, answers: number[]) => {
+    const result = submitAnswers({
       address: CONTRACTS.triviaGameV2.address,
       abi: CONTRACTS.triviaGameV2.abi,
       functionName: 'submitAnswers',
       args: [sessionId, answers.map(a => a)],
     });
+    
+    // Auto-fulfill VRF after submitting answers
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/api/fulfill-vrf', { method: 'POST' });
+        if (response.ok) {
+          console.log('VRF auto-fulfilled after answer submission');
+        }
+      } catch (error) {
+        console.warn('Auto VRF fulfillment failed:', error);
+      }
+    }, 3000);
+    
+    return result;
   }, [submitAnswers]);
 
   // Get latest session for current user
@@ -250,20 +278,22 @@ export function useGameQuestions(sessionQuestionIds?: number[]) {
   const [questions, setQuestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // If we have session question IDs from contract, fetch those specific questions
   useEffect(() => {
-    if (sessionQuestionIds && sessionQuestionIds.length > 0) {
-      // TODO: Fetch specific questions from contract
-      // For now, use mock questions
-      const mockQuestions = getRandomQuestions(10);
-      setQuestions(mockQuestions);
-      setIsLoading(false);
-    } else {
-      // Use mock questions as fallback
-      const mockQuestions = getRandomQuestions(10);
-      setQuestions(mockQuestions);
-      setIsLoading(false);
-    }
+    const contractQuestions = [
+      { question: "What is Celo?", options: ["A mobile-first blockchain platform", "A cryptocurrency exchange", "A digital wallet app", "A mining hardware company"], correctAnswer: 0, difficulty: "easy", category: "Basics" },
+      { question: "What is cUSD?", options: ["Celo Dollar stablecoin", "Canadian Dollar", "Crypto USD token", "Central USD"], correctAnswer: 0, difficulty: "easy", category: "Basics" },
+      { question: "What consensus mechanism does Celo use?", options: ["Proof of Work", "Proof of Stake", "Delegated Proof of Stake", "Proof of Authority"], correctAnswer: 1, difficulty: "medium", category: "Technical" },
+      { question: "What is MiniPay?", options: ["A payment processor", "A mobile wallet for Celo", "A cryptocurrency exchange", "A DeFi protocol"], correctAnswer: 1, difficulty: "easy", category: "Ecosystem" },
+      { question: "What is the native token of Celo?", options: ["CELO", "CUSD", "CEL", "CLO"], correctAnswer: 0, difficulty: "easy", category: "Basics" },
+      { question: "What makes Celo mobile-first?", options: ["Phone number addresses", "Low fees", "Fast transactions", "All of the above"], correctAnswer: 3, difficulty: "medium", category: "Features" },
+      { question: "What is Valora?", options: ["A DeFi protocol", "A Celo mobile wallet", "A stablecoin", "A consensus algorithm"], correctAnswer: 1, difficulty: "easy", category: "Ecosystem" },
+      { question: "What is the Celo Reserve?", options: ["A mining pool", "A staking mechanism", "Collateral backing stablecoins", "A governance token"], correctAnswer: 2, difficulty: "hard", category: "Technical" },
+      { question: "What programming language are Celo smart contracts written in?", options: ["JavaScript", "Python", "Solidity", "Rust"], correctAnswer: 2, difficulty: "medium", category: "Technical" },
+      { question: "What is the purpose of CELO tokens?", options: ["Only for payments", "Governance and staking", "Mining rewards", "Exchange fees"], correctAnswer: 1, difficulty: "medium", category: "Tokenomics" }
+    ];
+    
+    setQuestions(contractQuestions);
+    setIsLoading(false);
   }, [sessionQuestionIds]);
 
   return {
@@ -294,7 +324,8 @@ export function useRewards() {
   // Debug: Log the raw pending rewards data
   useEffect(() => {
     console.log('Raw pendingRewards from contract:', pendingRewards);
-  }, [pendingRewards]);
+    console.log('Checking rewards for address:', address);
+  }, [pendingRewards, address]);
 
   // Claim all rewards with MiniPay support
   const {
