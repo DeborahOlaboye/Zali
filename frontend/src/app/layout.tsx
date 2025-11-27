@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "react-hot-toast";
+import { MiniPayBanner } from "@/components/MiniPayBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-green-50 to-yellow-50 min-h-screen`}
       >
         <Providers>
+          <MiniPayBanner />
           <Navbar />
           <main className="min-h-screen">
             {children}

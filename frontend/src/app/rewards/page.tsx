@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { useRewards, useCeloBalance, usePlayerRegistration } from '@/hooks/useContract';
+import { useRewards, usePlayerRegistration } from '@/hooks/useContract';
 import { useMiniPay } from '@/hooks/useMiniPay';
+import { useCUSDBalance } from '@/hooks/useCUSDBalance';
+import { MiniPayRewards } from '@/components/MiniPayRewards';
 
 export default function RewardsPage() {
   const { address, isConnected } = useAccount();
   const { isMiniPay, isLoading: miniPayLoading } = useMiniPay();
-  const { balance, refetchBalance } = useCeloBalance();
+  const { balance, refetchBalance } = useCUSDBalance();
   const { isRegistered } = usePlayerRegistration();
   
   const {
@@ -116,6 +118,9 @@ export default function RewardsPage() {
           )}
         </motion.div>
 
+        {/* MiniPay Rewards Component */}
+        <MiniPayRewards />
+
         {/* Rewards Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -130,7 +135,7 @@ export default function RewardsPage() {
                 Pending Rewards
               </h2>
               <div className="text-4xl font-bold text-green-600 mb-4">
-                {pendingRewards} CELO
+                {pendingRewards} cUSD
               </div>
               <p className="text-gray-600 text-sm">
                 Earned from trivia games
@@ -144,7 +149,7 @@ export default function RewardsPage() {
                 Wallet Balance
               </h2>
               <div className="text-4xl font-bold text-blue-600 mb-4">
-                {parseFloat(balance).toFixed(4)} CELO
+                {parseFloat(balance).toFixed(4)} cUSD
               </div>
               <p className="text-gray-600 text-sm">
                 Current wallet balance
@@ -174,7 +179,7 @@ export default function RewardsPage() {
               ) : parseFloat(pendingRewards) <= 0 ? (
                 'No Rewards to Claim'
               ) : (
-                `Claim ${pendingRewards} CELO`
+                `Claim ${pendingRewards} cUSD`
               )}
             </button>
           </div>
@@ -187,7 +192,7 @@ export default function RewardsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-sm font-medium">
-                  💡 MiniPay Tip: Rewards are paid in CELO and gas fees are automatically paid in cUSD
+                  💡 MiniPay Tip: Rewards are paid in cUSD and gas fees are automatically paid in cUSD
                 </p>
               </div>
             </div>
@@ -209,21 +214,21 @@ export default function RewardsPage() {
             <div className="text-center p-4">
               <div className="text-4xl mb-3">✅</div>
               <h3 className="font-semibold text-gray-900 mb-2">Per Correct Answer</h3>
-              <p className="text-2xl font-bold text-green-600 mb-1">0.01 CELO</p>
+              <p className="text-2xl font-bold text-green-600 mb-1">0.01 cUSD</p>
               <p className="text-sm text-gray-600">Earn for each right answer</p>
             </div>
             
             <div className="text-center p-4">
               <div className="text-4xl mb-3">🎯</div>
               <h3 className="font-semibold text-gray-900 mb-2">Perfect Score</h3>
-              <p className="text-2xl font-bold text-purple-600 mb-1">0.05 CELO</p>
+              <p className="text-2xl font-bold text-purple-600 mb-1">0.05 cUSD</p>
               <p className="text-sm text-gray-600">Bonus for 10/10 correct</p>
             </div>
             
             <div className="text-center p-4">
               <div className="text-4xl mb-3">⚡</div>
               <h3 className="font-semibold text-gray-900 mb-2">Speed Bonus</h3>
-              <p className="text-2xl font-bold text-blue-600 mb-1">Up to 0.02 CELO</p>
+              <p className="text-2xl font-bold text-blue-600 mb-1">Up to 0.02 cUSD</p>
               <p className="text-sm text-gray-600">Answer faster for more!</p>
             </div>
           </div>
@@ -231,7 +236,7 @@ export default function RewardsPage() {
           <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border-2 border-green-200">
             <h3 className="font-bold text-gray-900 mb-3 text-center">💰 Maximum Earnings Per Game</h3>
             <div className="text-center">
-              <span className="text-3xl font-bold text-green-600">0.17 CELO</span>
+              <span className="text-3xl font-bold text-green-600">0.17 cUSD</span>
               <p className="text-sm text-gray-600 mt-1">
                 (10 correct × 0.01) + (perfect bonus 0.05) + (max speed bonus 0.02)
               </p>

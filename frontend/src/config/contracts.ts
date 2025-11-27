@@ -26,6 +26,13 @@ export const CONTRACTS = {
       },
       {
         "inputs": [],
+        "name": "claimAmount",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
         "name": "owner",
         "outputs": [{"internalType": "address", "name": "", "type": "address"}],
         "stateMutability": "view",
@@ -81,14 +88,15 @@ export const CONTRACTS = {
   },
 } as const;
 
-// Game constants
+// Game constants - MiniPay optimized with cUSD rewards
 export const GAME_CONSTANTS = {
   QUESTIONS_PER_SESSION: 10,
   TIME_LIMIT: 300, // 5 minutes in seconds
-  REWARD_PER_CORRECT: 0.01, // CELO
-  PERFECT_SCORE_BONUS: 0.05, // CELO
-  MAX_SPEED_BONUS: 0.02, // CELO
-  MAX_REWARD_PER_GAME: 0.17, // CELO
+  REWARD_PER_CORRECT: 0.01, // cUSD
+  PERFECT_SCORE_BONUS: 0.05, // cUSD
+  MAX_SPEED_BONUS: 0.02, // cUSD
+  MAX_REWARD_PER_GAME: 0.17, // cUSD
+  ENTRY_FEE: 0.05, // cUSD
   LEADERBOARD_SIZE: 100,
 } as const;
 

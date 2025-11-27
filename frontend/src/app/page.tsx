@@ -19,10 +19,10 @@ export default function Home() {
                 Celo Knowledge Quest
               </h1>
               <p className="text-xl sm:text-2xl text-gray-700 mb-4 max-w-3xl mx-auto">
-                Learn about Celo & DeFi while earning real cUSD rewards
+                Learn about Celo & DeFi while earning real cUSD rewards via MiniPay
               </p>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                The only trivia game where education meets play-to-earn meets prediction markets
+                Mobile-first trivia game optimized for MiniPay with seamless cUSD rewards
               </p>
             </motion.div>
 
@@ -58,12 +58,12 @@ export default function Home() {
                 <div className="text-gray-600">Entry Fee</div>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-md">
-                <div className="text-3xl font-bold text-yellow-600 mb-2">2-3x</div>
-                <div className="text-gray-600">Prediction Returns</div>
+                <div className="text-3xl font-bold text-yellow-600 mb-2">0.17 cUSD</div>
+                <div className="text-gray-600">Max Rewards</div>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-md">
-                <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
-                <div className="text-gray-600">On-Chain</div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">MiniPay</div>
+                <div className="text-gray-600">Optimized</div>
               </div>
             </motion.div>
           </div>
@@ -81,22 +81,22 @@ export default function Home() {
               {
                 icon: '🪙',
                 title: 'Claim Tokens',
-                description: 'Get 10 free cUSD from our faucet (one-time)',
+                description: 'Get free cUSD from our faucet via MiniPay',
               },
               {
                 icon: '🎮',
                 title: 'Play Trivia',
-                description: 'Answer 5 questions about Celo & DeFi for 0.05 cUSD',
+                description: 'Answer 10 questions about Celo & DeFi for 0.05 cUSD',
               },
               {
                 icon: '💰',
-                title: 'Win Prizes',
-                description: 'Top 3 players split the prize pool automatically',
+                title: 'Win cUSD',
+                description: 'Earn up to 0.17 cUSD per game with instant payouts',
               },
               {
-                icon: '🔮',
-                title: 'Predict & Earn',
-                description: 'Bet on winners for 2-3x returns on correct predictions',
+                icon: '📱',
+                title: 'MiniPay Ready',
+                description: 'Seamless experience with cUSD gas payments',
               },
             ].map((feature, index) => (
               <motion.div
@@ -126,11 +126,11 @@ export default function Home() {
             {[
               {
                 title: '📚 Educational',
-                description: 'Every question teaches you about Celo, DeFi, and blockchain fundamentals',
+                description: 'Learn about Celo, DeFi, and MiniPay while earning cUSD rewards',
               },
               {
-                title: '🎯 Prediction Market',
-                description: 'Bet on game outcomes and earn 2-3x returns on correct predictions',
+                title: '💰 cUSD Rewards',
+                description: 'Earn real cUSD stablecoin rewards with instant MiniPay payouts',
               },
               {
                 title: '📱 MiniPay Optimized',
@@ -160,7 +160,7 @@ export default function Home() {
             Ready to Start Learning and Earning?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Join Celo Knowledge Quest today and test your blockchain knowledge
+            Join via MiniPay and start earning cUSD while learning about Celo
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
