@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { SAMPLE_QUESTIONS } from '@/data/questions';
+
 import { useAccount } from 'wagmi';
 
 export default function ResultsPage() {
@@ -16,8 +16,7 @@ export default function ResultsPage() {
   const gameId = params.gameId as string;
   const score = parseInt(searchParams.get('score') || '0');
   const total = parseInt(searchParams.get('total') || '5');
-  const answersParam = searchParams.get('answers') || '';
-  const userAnswers = answersParam.split(',').map(a => parseInt(a));
+
   
   const [rewards, setRewards] = useState(0);
   const [rank, setRank] = useState(0);
@@ -207,82 +206,7 @@ export default function ResultsPage() {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-          className="bg-white rounded-2xl shadow-xl p-6 md:p-8"
-        >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            📝 Answer Review
-          </h2>
 
-          <div className="space-y-6">
-            {SAMPLE_QUESTIONS.map((question, index) => {
-              const userAnswer = userAnswers[index];
-              const isCorrect = userAnswer === question.correctAnswer;
-              const wasSkipped = userAnswer === -1;
-
-              return (
-                <div
-                  key={question.id}
-                  className={`border-2 rounded-xl p-4 md:p-6 ${
-                    isCorrect
-                      ? 'border-green-200 bg-green-50'
-                      : wasSkipped
-                      ? 'border-gray-200 bg-gray-50'
-                      : 'border-red-200 bg-red-50'
-                  }`}
-                >
-                  <div className="flex items-start gap-3 mb-4">
-                    <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        isCorrect
-                          ? 'bg-green-600 text-white'
-                          : wasSkipped
-                          ? 'bg-gray-400 text-white'
-                          : 'bg-red-600 text-white'
-                      }`}
-                    >
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 mb-2">
-                        {question.question}
-                      </p>
-                      
-                      {!wasSkipped && (
-                        <div className="mb-2">
-                          <span className="text-sm text-gray-600">Your answer: </span>
-                          <span className={`font-medium ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                            {question.options[userAnswer]}
-                          </span>
-                          {isCorrect ? ' ✓' : ' ✗'}
-                        </div>
-                      )}
-
-                      {!isCorrect && (
-                        <div className="mb-2">
-                          <span className="text-sm text-gray-600">Correct answer: </span>
-                          <span className="font-medium text-green-700">
-                            {question.options[question.correctAnswer]}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-semibold">💡 Explanation: </span>
-                          {question.explanation}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
 
         <motion.div
           initial={{ opacity: 0 }}

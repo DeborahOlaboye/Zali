@@ -178,18 +178,21 @@ export function useGameSession() {
   }, [startGame]);
 
   // Memoize the submitAnswers function
-  const memoizedSubmitAnswers = useCallback(async (sessionId: bigint, answers: number[]) => {
-    const result = isMiniPay && sendTransaction ?
-      await sendTransaction({
+  const memoizedSubmitAnswers = useCallback((sessionId: bigint, answers: number[]) => {
+    if (isMiniPay && sendTransaction) {
+      return sendTransaction({
         to: CONTRACTS.triviaGameV2.address,
         data: CONTRACTS.triviaGameV2.abi.find((f: any) => f.name === 'submitAnswers')?.encode([sessionId, answers]),
-      }) :
-      submitAnswers({
-        address: CONTRACTS.triviaGameV2.address,
-        abi: CONTRACTS.triviaGameV2.abi,
-        functionName: 'submitAnswers',
-        args: [sessionId, answers.map(a => a)],
       });
+    }
+    
+    // For regular wagmi, just call the function (it will trigger the transaction)
+    submitAnswers({
+      address: CONTRACTS.triviaGameV2.address,
+      abi: CONTRACTS.triviaGameV2.abi,
+      functionName: 'submitAnswers',
+      args: [sessionId, answers.map(a => a)],
+    });
     
     // Auto-fulfill VRF after submitting answers
     setTimeout(async () => {
@@ -202,9 +205,7 @@ export function useGameSession() {
         console.warn('Auto VRF fulfillment failed:', error);
       }
     }, 3000);
-    
-    return result;
-  }, [submitAnswers]);
+  }, [submitAnswers, isMiniPay, sendTransaction]);
 
   // Get latest session for current user
   const getLatestSession = useCallback(() => {

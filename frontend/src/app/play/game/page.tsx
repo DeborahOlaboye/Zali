@@ -102,45 +102,70 @@ export default function GamePage() {
   const finishGame = async (finalAnswers: number[], finalTimeSpent: number[]) => {
     setIsLoading(true);
     
+    // Show submitting message immediately
+    toast.loading('Submitting answers to blockchain...', { id: 'submit-answers' });
+    
     try {
-      // Calculate score
-      const score = calculateScore(finalAnswers, questions);
-      
       if (address) {
-        try {
-          // Get the latest session ID
-          const sessionId = getLatestSession();
-          console.log('Latest session ID:', sessionId);
+        // Get the latest session ID
+        const sessionId = getLatestSession();
+        console.log('Latest session ID:', sessionId);
+        
+        if (sessionId !== null) {
+          // Submit answers to smart contract and wait for completion
+          console.log('Submitting answers:', finalAnswers);
           
-          if (sessionId !== null) {
-            // Submit answers to smart contract
-            console.log('Submitting answers:', finalAnswers);
-            await submitAnswers(BigInt(sessionId), finalAnswers);
-            toast.success('Answers submitted to blockchain!');
-          } else {
-            console.log('No session ID found, skipping contract submission');
-          }
-        } catch (error) {
-          console.error('Error submitting to contract:', error);
-          toast.error('Failed to submit to blockchain, but game completed locally');
+          // This will trigger the transaction
+          submitAnswers(BigInt(sessionId), finalAnswers);
+          console.log('Submit answers called for session:', sessionId);
+          
+        } else {
+          toast.dismiss('submit-answers');
+          toast.error('No active session found');
+          setIsLoading(false);
+          return;
         }
+      } else {
+        toast.dismiss('submit-answers');
+        toast.error('Wallet not connected');
+        setIsLoading(false);
+        return;
       }
       
-
-      
-      toast.success(`Game complete! You scored ${score.correct}/${score.total}!`);
-      
-      // Navigate to results page
-      setTimeout(() => {
-        router.push(`/results/${gameId}?score=${score.correct}&total=${score.total}&answers=${finalAnswers.join(',')}`);
-      }, 1000);
-      
     } catch (error) {
-      console.error('Error finishing game:', error);
-      toast.error('Failed to submit game results');
+      console.error('Error submitting to contract:', error);
+      toast.dismiss('submit-answers');
+      toast.error('Failed to submit answers to blockchain');
       setIsLoading(false);
+      return;
     }
   };
+  
+  // Watch for successful submission
+  useEffect(() => {
+    if (submitIsSuccess && isLoading) {
+      toast.dismiss('submit-answers');
+      toast.success('Answers submitted successfully!');
+      
+      // Calculate score and navigate to results
+      const finalAnswers = [...answers];
+      if (finalAnswers.length < questions.length) {
+        // Add the last answer if it's not in the array yet
+        finalAnswers.push(-1);
+      }
+      const score = calculateScore(finalAnswers, questions);
+      
+      setTimeout(() => {
+        toast.success(`Game complete! You scored ${score.correct}/${score.total}!`);
+        
+        setTimeout(() => {
+          router.push(`/results/${gameId}?score=${score.correct}&total=${score.total}`);
+        }, 1000);
+      }, 1000);
+      
+      setIsLoading(false);
+    }
+  }, [submitIsSuccess, isLoading, answers, questions, router, gameId]);
 
   if (!isConnected) {
     return (
@@ -261,7 +286,7 @@ export default function GamePage() {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Answer quickly to maximize your score</li>
                 <li>• Read each question carefully</li>
-                <li>• Learn from the explanations after the game</li>
+                <li>• Think before you answer - no second chances!</li>
               </ul>
             </div>
           </div>
