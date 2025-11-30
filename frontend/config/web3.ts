@@ -54,8 +54,7 @@ const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-proj
 const wagmiAdapter = new WagmiAdapter({
   networks: [celoSepolia, celo],
   projectId,
-  ssr: true,
-  autoConnect: true
+  ssr: true
 })
 
 // 3. Configure the modal
