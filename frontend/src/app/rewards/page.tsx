@@ -1,21 +1,103 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAccount } from 'wagmi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowPathIcon, ArrowRightIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { 
+  ArrowPathIcon, 
+  CheckCircleIcon, 
+  GiftIcon, 
+  TrophyIcon, 
+  ClockIcon,
+  FireIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { useRewards, usePlayerRegistration } from '@/hooks/useContract';
+import { useRewards, usePlayerRegistration, useLeaderboard } from '@/hooks/useContract';
 import { useMiniPay } from '@/hooks/useMiniPay';
 import { useCUSDBalance } from '@/hooks/useCUSDBalance';
 import { MiniPayRewards } from '@/components/MiniPayRewards';
 import { RewardCard } from '@/components/RewardCard';
+import { RewardItem } from '@/components/RewardItem';
+import { Leaderboard } from '@/components/Leaderboard';
+import { PointsHistory } from '@/components/PointsHistory';
+
+// Mock data for rewards (replace with actual data from your contract)
+const AVAILABLE_REWARDS = [
+  {
+    id: 1,
+    name: 'Starter Pack',
+    description: 'Get a boost to start your journey',
+    pointsRequired: 100,
+    isClaimed: false,
+  },
+  {
+    id: 2,
+    name: 'Power Player',
+    description: 'Unlock exclusive games and features',
+    pointsRequired: 500,
+    isClaimed: false,
+  },
+  {
+    id: 3,
+    name: 'Elite Status',
+    description: 'Access to premium content and early features',
+    pointsRequired: 1000,
+    isClaimed: false,
+  },
+  {
+    id: 4,
+    name: 'Crypto Whiz',
+    description: 'Special NFT badge for top players',
+    pointsRequired: 5000,
+    isClaimed: false,
+  },
+];
+
+// Mock points history (replace with actual data from your contract)
+const MOCK_POINTS_HISTORY = [
+  {
+    id: '1',
+    type: 'game',
+    points: 50,
+    description: 'Completed Trivia Challenge #42',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+    status: 'completed',
+  },
+  {
+    id: '2',
+    type: 'bonus',
+    points: 10,
+    description: 'Daily Login Bonus',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    status: 'completed',
+  },
+  {
+    id: '3',
+    type: 'reward',
+    points: -100,
+    description: 'Redeemed Starter Pack',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    status: 'completed',
+  },
+];
+
+// Calculate level based on points
+const calculateLevel = (points: number) => {
+  return Math.floor(points / 100) + 1; // 100 points per level
+};
+
+// Calculate progress to next level
+const calculateProgress = (points: number) => {
+  const currentLevelPoints = Math.floor(points / 100) * 100;
+  return ((points - currentLevelPoints) / 100) * 100;
+};
 
 export default function RewardsPage() {
   const { address, isConnected } = useAccount();
   const { isMiniPay, isLoading: miniPayLoading } = useMiniPay();
   const { balance, refetchBalance } = useCUSDBalance();
-  const { isRegistered } = usePlayerRegistration();
+  const { isRegistered, playerInfo } = usePlayerRegistration();
   
   const {
     pendingRewards,
@@ -27,7 +109,19 @@ export default function RewardsPage() {
     refetchPendingRewards,
   } = useRewards();
 
+  // Get leaderboard data
+  const { leaderboardData, refetchLeaderboard } = useLeaderboard(10);
+  
   const [isClaimingRewards, setIsClaimingRewards] = useState(false);
+  const [isRedeeming, setIsRedeeming] = useState<number | null>(null);
+  const [rewards, setRewards] = useState(AVAILABLE_REWARDS);
+  const [activeTab, setActiveTab] = useState<'rewards' | 'leaderboard' | 'history'>('rewards');
+
+  // Calculate points and level
+  const points = parseInt(pendingRewards || '0', 10);
+  const level = calculateLevel(points);
+  const progress = calculateProgress(points);
+  const pointsToNextLevel = (level * 100) - points;
 
   // Handle successful claim
   useEffect(() => {
@@ -36,8 +130,9 @@ export default function RewardsPage() {
       setIsClaimingRewards(false);
       refetchPendingRewards();
       refetchBalance();
+      refetchLeaderboard();
     }
-  }, [claimIsSuccess, isClaimingRewards, refetchPendingRewards, refetchBalance]);
+  }, [claimIsSuccess, isClaimingRewards, refetchPendingRewards, refetchBalance, refetchLeaderboard]);
 
   // Handle claim error
   useEffect(() => {
@@ -46,6 +141,38 @@ export default function RewardsPage() {
       setIsClaimingRewards(false);
     }
   }, [claimIsError, claimError, isClaimingRewards]);
+
+  // Handle reward redemption
+  const handleRedeemReward = async (rewardId: number) => {
+    const reward = rewards.find(r => r.id === rewardId);
+    if (!reward) return;
+    
+    if (points < reward.pointsRequired) {
+      toast.error('Not enough points to redeem this reward');
+      return;
+    }
+    
+    try {
+      setIsRedeeming(rewardId);
+      
+      // Simulate API call to redeem reward
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Update rewards to mark as claimed
+      setRewards(prev => 
+        prev.map(r => 
+          r.id === rewardId ? { ...r, isClaimed: true } : r
+        )
+      );
+      
+      toast.success(`🎉 Successfully redeemed ${reward.name}!`);
+    } catch (error) {
+      console.error('Failed to redeem reward:', error);
+      toast.error('Failed to redeem reward. Please try again.');
+    } finally {
+      setIsRedeeming(null);
+    }
+  };
 
   const handleClaimRewards = async () => {
     if (!isConnected || !address) {
@@ -152,96 +279,11 @@ export default function RewardsPage() {
             {/* Progress Bar */}
             <div className="mb-8">
               <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>Progress to Next Reward</span>
-                <span>{pendingRewards} cUSD / 0.17 cUSD</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                <motion.div 
-                  className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full"
-                  initial={{ width: '0%' }}
-                  animate={{ width: `${progressPercentage}%` }}
-                  transition={{ duration: 1, ease: 'easeOut' }}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <RewardCard
-                icon="🎁"
-                title="Pending Rewards"
-                amount={`${pendingRewards} cUSD`}
-                description="Available to claim now"
-                color="text-green-500"
-              />
-              
-              <RewardCard
-                icon="💳"
-                title="Wallet Balance"
-                amount={`${parseFloat(balance).toFixed(4)} cUSD`}
-                description="Current balance"
-                color="text-blue-500"
-              />
-            </div>
-
-            {/* Claim Button */}
-            <div className="mt-2">
-              <button
-                onClick={handleClaimRewards}
-                disabled={!isMiniPay || claimIsLoading || isClaimingRewards || parseFloat(pendingRewards) <= 0}
-                className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all transform ${
-                  !isMiniPay || claimIsLoading || isClaimingRewards || parseFloat(pendingRewards) <= 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 hover:shadow-lg active:scale-95'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  {claimIsLoading || isClaimingRewards ? (
-                    <>
-                      <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                      <span>Processing...</span>
-                    </>
-                  ) : !isMiniPay ? (
-                    <span>🔒 Connect MiniPay to Claim</span>
-                  ) : parseFloat(pendingRewards) <= 0 ? (
-                    <span>No Rewards to Claim</span>
-                  ) : (
-                    <>
-                      <span>Claim {pendingRewards} cUSD</span>
-                      <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
                 </div>
-              </button>
-              
-              {!isMiniPay && (
-                <p className="mt-3 text-sm text-center text-amber-600 flex items-center justify-center gap-1">
-                  <ExclamationCircleIcon className="w-4 h-4" />
-                  MiniPay is required to claim rewards
-                </p>
-              )}
-            </div>
-          </div>
-          
-          {/* Rewards Info Section */}
-          <div className="bg-gray-50 border-t border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 How to Earn More</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <RewardCard
-                icon="✅"
-                title="Correct Answers"
-                amount="0.01 cUSD"
-                description="Per correct answer"
-                color="text-green-500"
-              />
-              <RewardCard
-                icon="🎯"
-                title="Perfect Score"
-                amount="0.05 cUSD"
-                description="Bonus for 10/10 correct"
-                color="text-purple-500"
-              />
-              <RewardCard
-                icon="⚡"
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {playerInfo && playerInfo[0] ? playerInfo[0] : 'Player'}
+                  </h3>
                 title="Speed Bonus"
                 amount="Up to 0.02 cUSD"
                 description="Faster answers = More rewards"
