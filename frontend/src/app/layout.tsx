@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "react-hot-toast";
 import { MiniPayBanner } from "@/components/MiniPayBanner";
+import { AutoFaucetProvider } from "@/contexts/AutoFaucetContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,12 +25,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} antialiased bg-gradient-to-br from-green-50 to-yellow-50 min-h-screen`}>
         <Providers>
-          <MiniPayBanner />
-          <Navbar />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Toaster position="top-right" />
+          <AutoFaucetProvider>
+            <MiniPayBanner />
+            <Navbar />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Toaster position="top-right" />
+          </AutoFaucetProvider>
         </Providers>
       </body>
     </html>

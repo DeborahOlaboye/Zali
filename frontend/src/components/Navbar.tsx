@@ -53,11 +53,12 @@ export default function Navbar() {
       setMobileMenuOpen(false);
     };
     
-    router.events?.on('routeChangeStart', handleRouteChange);
-    return () => {
-      router.events?.off('routeChangeStart', handleRouteChange);
-    };
-  }, [router]);
+    // Close menu when pathname changes
+    handleRouteChange();
+    
+    // Cleanup function
+    return () => {};
+  }, [pathname]); // Re-run when pathname changes
 
   // Close mobile menu when clicking outside
   useEffect(() => {
