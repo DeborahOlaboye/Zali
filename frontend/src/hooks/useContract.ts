@@ -4,6 +4,7 @@ import { parseEther, formatEther } from 'viem';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getRandomQuestions } from '@/data/questions';
 import { useCeloMiniPay } from './useCeloMiniPay';
+import { useTokenApproval } from './useTokenApproval';
 
 // ============ TRIVIA GAME V2 HOOKS ============
 
@@ -111,6 +112,18 @@ export function usePlayerRegistration() {
 export function useGameSession() {
   const { address } = useAccount();
   const { isMiniPay, sendTransaction } = useCeloMiniPay();
+  
+  // Token approval hook
+  const {
+    needsApproval,
+    hasSufficientApproval,
+    isLoading: isApprovalLoading,
+    isApproving,
+    isWaitingForApproval,
+    approve,
+    ensureApproval,
+    refetchAllowance,
+  } = useTokenApproval();
 
   // Get player's session count
   const { data: sessionCount } = useReadContract({
@@ -149,8 +162,22 @@ export function useGameSession() {
     hash: submitData,
   });
 
-  // Memoize the startGame function to prevent recreation on every render
+  // Memoize the startGame function with approval check
   const memoizedStartGame = useCallback(async () => {
+    if (!address) {
+      throw new Error('Wallet not connected');
+    }
+
+    // Check and ensure approval before starting game
+    if (needsApproval) {
+      // Approval needed - approve first
+      await approve();
+      // Wait for approval to be confirmed
+      // The caller should wait for approval success before calling startGame again
+      throw new Error('Token approval required. Please wait for approval to complete.');
+    }
+
+    // If we have sufficient approval, proceed with starting the game
     const result = isMiniPay && sendTransaction ? 
       await sendTransaction({
         to: CONTRACTS.triviaGameV2.address,
@@ -162,10 +189,8 @@ export function useGameSession() {
         functionName: 'startGame',
       });
     
-
-    
     return result;
-  }, [startGame]);
+  }, [startGame, address, needsApproval, approve, isMiniPay, sendTransaction]);
 
   // Memoize the submitAnswers function
   const memoizedSubmitAnswers = useCallback((sessionId: bigint, answers: number[]) => {
@@ -206,6 +231,15 @@ export function useGameSession() {
     submitIsError,
     submitError,
     getLatestSession,
+    // Token approval states
+    needsApproval,
+    hasSufficientApproval,
+    isApprovalLoading,
+    isApproving,
+    isWaitingForApproval,
+    approve,
+    ensureApproval,
+    refetchAllowance,
   };
 }
 

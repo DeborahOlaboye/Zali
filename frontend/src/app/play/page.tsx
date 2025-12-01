@@ -22,7 +22,19 @@ export default function PlayPage() {
       refetchPlayerInfo();
     }
   }, [address, refetchPlayerInfo]);
-  const { startGame, startGameIsLoading, startGameIsSuccess, startGameError } = useGameSession();
+  const { 
+    startGame, 
+    startGameIsLoading, 
+    startGameIsSuccess, 
+    startGameError,
+    needsApproval,
+    hasSufficientApproval,
+    isApprovalLoading,
+    isApproving,
+    isWaitingForApproval,
+    approve,
+    refetchAllowance,
+  } = useGameSession();
   const { balance } = useCeloBalance();
   const { questionCount } = useQuestions();
   const { contractBalance } = useContractInfo();
@@ -69,15 +81,67 @@ export default function PlayPage() {
     setIsStarting(true);
 
     try {
+      // Check if approval is needed
+      if (needsApproval) {
+        toast.loading('Approving tokens... Please confirm the transaction in your wallet', {
+          id: 'approval-loading',
+          duration: 60000,
+        });
+        
+        try {
+          await approve();
+          // Wait for approval to complete
+          toast.loading('Waiting for approval confirmation...', {
+            id: 'approval-waiting',
+            duration: 60000,
+          });
+          
+          // Refetch allowance to check if approval went through
+          // In a real scenario, you might want to poll or use events
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          await refetchAllowance();
+          
+          toast.dismiss('approval-waiting');
+          toast.success('Token approval successful!');
+          
+          // Small delay before starting game
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (approvalError: any) {
+          toast.dismiss('approval-loading');
+          toast.dismiss('approval-waiting');
+          console.error('Approval error:', approvalError);
+          
+          if (approvalError?.message?.includes('User rejected') || approvalError?.message?.includes('rejected')) {
+            toast.error('Approval cancelled');
+          } else {
+            toast.error(approvalError?.message || 'Failed to approve tokens');
+          }
+          setIsStarting(false);
+          return;
+        }
+      }
+
+      // Now start the game
       toast.loading('Starting game... Please confirm the transaction', {
+        id: 'start-game-loading',
         duration: 60000,
       });
       
-      startGame();
+      await startGame();
     } catch (error: any) {
       console.error('Error starting game:', error);
-      toast.dismiss();
-      toast.error(error?.message || 'Failed to start game');
+      toast.dismiss('start-game-loading');
+      toast.dismiss('approval-loading');
+      toast.dismiss('approval-waiting');
+      
+      if (error?.message?.includes('approval required')) {
+        // Approval is still needed, but we already tried
+        toast.error('Please wait for approval to complete before starting the game');
+      } else if (error?.message?.includes('User rejected') || error?.message?.includes('rejected')) {
+        toast.error('Transaction cancelled');
+      } else {
+        toast.error(error?.message || 'Failed to start game');
+      }
       setIsStarting(false);
     }
   };
@@ -206,16 +270,24 @@ export default function PlayPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
                 onClick={handleStartPlaying}
-                disabled={!isConnected || !isRegistered || startGameIsLoading || isStarting}
+                disabled={!isConnected || !isRegistered || startGameIsLoading || isStarting || isApprovalLoading}
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed min-w-[250px]"
               >
                 {!isConnected 
                   ? '🔌 Connect Wallet First'
                   : !isRegistered
                     ? '👤 Register First'
-                    : startGameIsLoading || isStarting
-                      ? '⏳ Starting Game...'
-                      : '🎮 Start Playing (FREE)'
+                    : isApprovalLoading || isApproving || isWaitingForApproval
+                      ? isApproving
+                        ? '⏳ Approving Tokens...'
+                        : isWaitingForApproval
+                          ? '⏳ Waiting for Approval...'
+                          : '⏳ Checking Approval...'
+                      : startGameIsLoading || isStarting
+                        ? '⏳ Starting Game...'
+                        : needsApproval
+                          ? '🔐 Approve & Start Game'
+                          : '🎮 Start Playing (FREE)'
                 }
               </button>
             </div>
