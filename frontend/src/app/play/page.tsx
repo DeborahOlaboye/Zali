@@ -111,10 +111,20 @@ export default function PlayPage() {
           toast.dismiss('approval-waiting');
           console.error('Approval error:', approvalError);
           
-          if (approvalError?.message?.includes('User rejected') || approvalError?.message?.includes('rejected')) {
-            toast.error('Approval cancelled');
+          // Use the enhanced error message from the hook
+          const errorMessage = approvalError?.message || 'Failed to approve tokens. Please try again.';
+          
+          // Provide specific guidance based on error type
+          if (approvalError?.code === 'TOKEN_APPROVAL_REJECTED' || 
+              approvalError?.message?.includes('cancelled') ||
+              approvalError?.message?.includes('rejected')) {
+            toast.error('Token approval was cancelled. Please approve the transaction to start the game.');
+          } else if (approvalError?.code === 'WALLET_NOT_CONNECTED') {
+            toast.error('Wallet not connected. Please connect your wallet and try again.');
+          } else if (approvalError?.code === 'NETWORK_ERROR') {
+            toast.error('Network error. Please check your connection and try again.');
           } else {
-            toast.error(approvalError?.message || 'Failed to approve tokens');
+            toast.error(errorMessage);
           }
           setIsStarting(false);
           return;
@@ -134,13 +144,26 @@ export default function PlayPage() {
       toast.dismiss('approval-loading');
       toast.dismiss('approval-waiting');
       
-      if (error?.message?.includes('approval required')) {
-        // Approval is still needed, but we already tried
-        toast.error('Please wait for approval to complete before starting the game');
-      } else if (error?.message?.includes('User rejected') || error?.message?.includes('rejected')) {
-        toast.error('Transaction cancelled');
+      const errorMessage = error?.message || 'Failed to start game. Please try again.';
+      
+      // Provide specific guidance based on error type
+      if (error?.code === 'INSUFFICIENT_ALLOWANCE' || error?.message?.includes('approval required')) {
+        toast.error('Token approval required. Please approve the transaction to allow the game to use your tokens.');
+      } else if (error?.code === 'INSUFFICIENT_TOKEN_BALANCE' || error?.message?.includes('insufficient balance')) {
+        toast.error('Insufficient cUSD balance. Please add more tokens to your wallet.');
+      } else if (error?.code === 'TOKEN_TRANSFER_FAILED' || error?.message?.includes('transfer failed')) {
+        toast.error('Token transfer failed. Please check your balance and try again.');
+      } else if (error?.code === 'TRANSACTION_REJECTED' || 
+                 error?.message?.includes('User rejected') || 
+                 error?.message?.includes('rejected') ||
+                 error?.message?.includes('cancelled')) {
+        toast.error('Transaction was cancelled. Please try again when ready.');
+      } else if (error?.code === 'WALLET_NOT_CONNECTED') {
+        toast.error('Wallet not connected. Please connect your wallet and try again.');
+      } else if (error?.code === 'NETWORK_ERROR') {
+        toast.error('Network error. Please check your connection and try again.');
       } else {
-        toast.error(error?.message || 'Failed to start game');
+        toast.error(errorMessage);
       }
       setIsStarting(false);
     }

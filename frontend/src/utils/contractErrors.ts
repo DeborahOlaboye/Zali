@@ -15,6 +15,16 @@ export enum ContractErrorType {
   INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS',
   GAS_ESTIMATION_FAILED = 'GAS_ESTIMATION_FAILED',
   
+  // Token transfer errors
+  INSUFFICIENT_TOKEN_BALANCE = 'INSUFFICIENT_TOKEN_BALANCE',
+  INSUFFICIENT_ALLOWANCE = 'INSUFFICIENT_ALLOWANCE',
+  TOKEN_TRANSFER_FAILED = 'TOKEN_TRANSFER_FAILED',
+  TOKEN_APPROVAL_FAILED = 'TOKEN_APPROVAL_FAILED',
+  TOKEN_APPROVAL_REJECTED = 'TOKEN_APPROVAL_REJECTED',
+  TOKEN_TRANSFER_REJECTED = 'TOKEN_TRANSFER_REJECTED',
+  ZERO_AMOUNT_TRANSFER = 'ZERO_AMOUNT_TRANSFER',
+  TRANSFER_TO_ZERO_ADDRESS = 'TRANSFER_TO_ZERO_ADDRESS',
+  
   // Contract-specific errors
   NOT_REGISTERED = 'NOT_REGISTERED',
   ALREADY_REGISTERED = 'ALREADY_REGISTERED',
@@ -76,6 +86,60 @@ export function isInsufficientFundsError(error: any): boolean {
 }
 
 /**
+ * Checks if an error is related to token transfer
+ */
+export function isTokenTransferError(error: any): boolean {
+  const message = error?.message?.toLowerCase() || '';
+  const reason = error?.reason?.toLowerCase() || '';
+  const data = error?.data?.message?.toLowerCase() || '';
+  
+  return (
+    message.includes('transfer') ||
+    message.includes('erc20') ||
+    message.includes('token') ||
+    reason.includes('transfer') ||
+    reason.includes('erc20') ||
+    data.includes('transfer') ||
+    error?.code === 'TRANSFER_FAILED' ||
+    error?.code === 'TOKEN_TRANSFER_FAILED'
+  );
+}
+
+/**
+ * Checks if an error is related to insufficient token allowance
+ */
+export function isInsufficientAllowanceError(error: any): boolean {
+  const message = error?.message?.toLowerCase() || '';
+  const reason = error?.reason?.toLowerCase() || '';
+  
+  return (
+    message.includes('allowance') ||
+    message.includes('insufficient allowance') ||
+    message.includes('allowance too low') ||
+    reason.includes('allowance') ||
+    error?.code === 'INSUFFICIENT_ALLOWANCE' ||
+    error?.data?.message?.toLowerCase()?.includes('allowance')
+  );
+}
+
+/**
+ * Checks if an error is related to token approval
+ */
+export function isTokenApprovalError(error: any): boolean {
+  const message = error?.message?.toLowerCase() || '';
+  const reason = error?.reason?.toLowerCase() || '';
+  
+  return (
+    message.includes('approve') ||
+    message.includes('approval') ||
+    reason.includes('approve') ||
+    reason.includes('approval') ||
+    error?.code === 'APPROVAL_FAILED' ||
+    error?.code === 'TOKEN_APPROVAL_FAILED'
+  );
+}
+
+/**
  * Checks if an error is a network error
  */
 export function isNetworkError(error: any): boolean {
@@ -107,6 +171,71 @@ export function parseContractError(error: any): { message: string; code: Contrac
     return {
       message: 'Insufficient funds for transaction',
       code: ContractErrorType.INSUFFICIENT_FUNDS,
+    };
+  }
+
+  // Handle token transfer errors (check before generic errors)
+  if (isTokenTransferError(error)) {
+    const message = error?.message?.toLowerCase() || '';
+    const reason = error?.reason?.toLowerCase() || '';
+    const errorData = message + ' ' + reason;
+    
+    // Insufficient token balance
+    if (errorData.includes('insufficient balance') || 
+        errorData.includes('balance too low') ||
+        errorData.includes('exceeds balance') ||
+        errorData.includes('transfer amount exceeds balance')) {
+      return {
+        message: 'Insufficient token balance. Please ensure you have enough cUSD in your wallet.',
+        code: ContractErrorType.INSUFFICIENT_TOKEN_BALANCE,
+      };
+    }
+    
+    // Insufficient allowance
+    if (isInsufficientAllowanceError(error)) {
+      return {
+        message: 'Token approval required. Please approve the transaction to allow the contract to spend your tokens.',
+        code: ContractErrorType.INSUFFICIENT_ALLOWANCE,
+      };
+    }
+    
+    // Transfer to zero address
+    if (errorData.includes('transfer to zero address') ||
+        errorData.includes('transfer to the zero address')) {
+      return {
+        message: 'Cannot transfer tokens to an invalid address.',
+        code: ContractErrorType.TRANSFER_TO_ZERO_ADDRESS,
+      };
+    }
+    
+    // Zero amount transfer
+    if (errorData.includes('transfer amount is zero') ||
+        errorData.includes('amount must be greater than zero')) {
+      return {
+        message: 'Transfer amount must be greater than zero.',
+        code: ContractErrorType.ZERO_AMOUNT_TRANSFER,
+      };
+    }
+    
+    // Generic token transfer failure
+    return {
+      message: 'Token transfer failed. Please check your balance and try again.',
+      code: ContractErrorType.TOKEN_TRANSFER_FAILED,
+    };
+  }
+  
+  // Handle token approval errors
+  if (isTokenApprovalError(error)) {
+    if (isUserRejectedError(error)) {
+      return {
+        message: 'Token approval was cancelled. Please approve the transaction to continue.',
+        code: ContractErrorType.TOKEN_APPROVAL_REJECTED,
+      };
+    }
+    
+    return {
+      message: 'Token approval failed. Please try again or check your wallet connection.',
+      code: ContractErrorType.TOKEN_APPROVAL_FAILED,
     };
   }
 
