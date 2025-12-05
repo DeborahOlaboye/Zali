@@ -38,7 +38,7 @@
     "react-hot-toast": "^2.6.0",
     "viem": "^2.39.3",
     "wagmi": "^2.19.4",
-    "zod": "^4.1.13"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
