@@ -177,12 +177,29 @@ The hook provides granular loading states for better UX:
 
 ## Error Handling
 
-The hook handles various error scenarios:
+The hook handles various error scenarios with improved, user-friendly messages:
 
-- **Wallet not connected**: Throws error when trying to approve without wallet
-- **User rejection**: Detects when user rejects transaction in wallet
-- **Transaction failure**: Handles failed transactions gracefully
-- **Network errors**: Catches and reports network-related errors
+### Token Transfer Errors
+
+- **Insufficient Token Balance**: "Insufficient token balance. Please ensure you have enough cUSD in your wallet."
+- **Insufficient Allowance**: "Token approval required. Please approve the transaction to allow the contract to spend your tokens."
+- **Transfer Failed**: "Token transfer failed. Please check your balance and try again."
+- **Zero Amount**: "Transfer amount must be greater than zero."
+- **Invalid Address**: "Cannot transfer tokens to an invalid address."
+
+### Token Approval Errors
+
+- **Approval Rejected**: "Token approval was cancelled. Please approve the transaction to continue."
+- **Approval Failed**: "Token approval failed. Please try again or check your wallet connection."
+
+### General Errors
+
+- **Wallet not connected**: "Wallet not connected. Please connect your wallet to approve tokens."
+- **User rejection**: Detects when user rejects transaction in wallet with clear messaging
+- **Transaction failure**: Handles failed transactions gracefully with specific error messages
+- **Network errors**: "Network error. Please check your connection and try again."
+
+All errors are parsed using the `parseContractError` utility which provides consistent, user-friendly error messages across the application.
 
 ## UI Integration
 
@@ -235,8 +252,11 @@ The test suite covers:
 - Detection of approval needs
 - Loading states (allowance check, approving, waiting)
 - Approval function calls with correct parameters
-- Error handling
+- Error handling with improved error messages
 - Success states
+- Token transfer error detection
+- Token approval error detection
+- User-friendly error message parsing
 
 ## Best Practices
 
@@ -269,6 +289,16 @@ The test suite covers:
 - Ensure `encodeFunctionData` is imported from `viem`
 - Verify ABI includes the `approve` function
 - Check that contract addresses are correct
+
+### Common Error Messages
+
+If you encounter specific error messages, here's what they mean:
+
+- **"Insufficient token balance"**: The user doesn't have enough cUSD tokens. They need to add more tokens to their wallet.
+- **"Token approval required"**: The user needs to approve the contract to spend their tokens. This happens automatically in the flow.
+- **"Token transfer failed"**: The transfer transaction failed. This could be due to network issues, insufficient gas, or contract issues.
+- **"Transaction was cancelled"**: The user rejected the transaction in their wallet. They can try again.
+- **"Network error"**: There's a problem with the network connection. Check internet connectivity.
 
 ## Security Considerations
 

@@ -3,6 +3,7 @@ import { CONTRACTS, GAME_CONSTANTS } from '@/config/contracts';
 import { parseEther, maxUint256, encodeFunctionData } from 'viem';
 import { useCallback, useMemo } from 'react';
 import { useCeloMiniPay } from './useCeloMiniPay';
+import { parseContractError, ContractErrorType } from '@/utils/contractErrors';
 
 /**
  * Hook for managing token approvals with proper loading states
@@ -89,31 +90,42 @@ export function useTokenApproval() {
    */
   const approve = useCallback(async (amount?: bigint) => {
     if (!address) {
-      throw new Error('Wallet not connected');
+      const error = new Error('Wallet not connected. Please connect your wallet to approve tokens.');
+      (error as any).code = ContractErrorType.WALLET_NOT_CONNECTED;
+      throw error;
     }
 
     const approvalAmount = amount || maxUint256;
 
-    if (isMiniPay && sendTransaction) {
-      // For MiniPay, encode the approval transaction
-      const data = encodeFunctionData({
+    try {
+      if (isMiniPay && sendTransaction) {
+        // For MiniPay, encode the approval transaction
+        const data = encodeFunctionData({
+          abi: CONTRACTS.cUSD.abi,
+          functionName: 'approve',
+          args: [CONTRACTS.triviaGameV2.address, approvalAmount],
+        });
+
+        return sendTransaction({
+          to: CONTRACTS.cUSD.address,
+          data,
+        });
+      }
+
+      return approveToken({
+        address: CONTRACTS.cUSD.address,
         abi: CONTRACTS.cUSD.abi,
         functionName: 'approve',
         args: [CONTRACTS.triviaGameV2.address, approvalAmount],
       });
-
-      return sendTransaction({
-        to: CONTRACTS.cUSD.address,
-        data,
-      });
+    } catch (error: any) {
+      // Parse and enhance error message
+      const parsedError = parseContractError(error);
+      const enhancedError = new Error(parsedError.message);
+      (enhancedError as any).code = parsedError.code;
+      (enhancedError as any).originalError = error;
+      throw enhancedError;
     }
-
-    return approveToken({
-      address: CONTRACTS.cUSD.address,
-      abi: CONTRACTS.cUSD.abi,
-      functionName: 'approve',
-      args: [CONTRACTS.triviaGameV2.address, approvalAmount],
-    });
   }, [address, isMiniPay, sendTransaction, approveToken]);
 
   /**
@@ -122,31 +134,42 @@ export function useTokenApproval() {
    */
   const ensureApproval = useCallback(async (callback?: () => void | Promise<void>) => {
     if (!address) {
-      throw new Error('Wallet not connected');
+      const error = new Error('Wallet not connected. Please connect your wallet first.');
+      (error as any).code = ContractErrorType.WALLET_NOT_CONNECTED;
+      throw error;
     }
 
-    // Refetch allowance to get latest value
-    const { data: currentAllowance } = await refetchAllowance();
+    try {
+      // Refetch allowance to get latest value
+      const { data: currentAllowance } = await refetchAllowance();
 
-    if (!currentAllowance || currentAllowance < requiredAmount) {
-      // Approval needed
-      await approve();
-      
-      // Wait for approval to complete
-      // Note: In a real scenario, you might want to poll for the allowance update
-      // For now, we'll rely on the transaction receipt
-      
-      if (callback) {
-        // Wait a bit for the approval to be processed
-        setTimeout(async () => {
+      if (!currentAllowance || currentAllowance < requiredAmount) {
+        // Approval needed
+        await approve();
+        
+        // Wait for approval to complete
+        // Note: In a real scenario, you might want to poll for the allowance update
+        // For now, we'll rely on the transaction receipt
+        
+        if (callback) {
+          // Wait a bit for the approval to be processed
+          setTimeout(async () => {
+            await callback();
+          }, 2000);
+        }
+      } else {
+        // Already approved, execute callback immediately
+        if (callback) {
           await callback();
-        }, 2000);
+        }
       }
-    } else {
-      // Already approved, execute callback immediately
-      if (callback) {
-        await callback();
-      }
+    } catch (error: any) {
+      // Parse and enhance error message
+      const parsedError = parseContractError(error);
+      const enhancedError = new Error(parsedError.message);
+      (enhancedError as any).code = parsedError.code;
+      (enhancedError as any).originalError = error;
+      throw enhancedError;
     }
   }, [address, requiredAmount, approve, refetchAllowance]);
 

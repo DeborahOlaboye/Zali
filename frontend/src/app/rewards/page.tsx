@@ -204,7 +204,26 @@ export default function RewardsPage() {
     } catch (error: any) {
       console.error('Error claiming rewards:', error);
       toast.dismiss();
-      toast.error(error?.message || 'Failed to claim rewards');
+      
+      const errorMessage = error?.message || 'Failed to claim rewards. Please try again.';
+      
+      // Provide specific guidance based on error type
+      if (error?.code === 'TOKEN_TRANSFER_FAILED' || error?.message?.includes('transfer failed')) {
+        toast.error('Token transfer failed. The contract may not have enough funds. Please contact support.');
+      } else if (error?.code === 'INSUFFICIENT_TOKEN_BALANCE' || error?.message?.includes('insufficient balance')) {
+        toast.error('Insufficient contract balance. Please contact support.');
+      } else if (error?.code === 'TRANSACTION_REJECTED' || 
+                 error?.message?.includes('User rejected') || 
+                 error?.message?.includes('rejected') ||
+                 error?.message?.includes('cancelled')) {
+        toast.error('Transaction was cancelled. Please try again when ready.');
+      } else if (error?.code === 'WALLET_NOT_CONNECTED') {
+        toast.error('Wallet not connected. Please connect your wallet and try again.');
+      } else if (error?.code === 'NETWORK_ERROR') {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error(errorMessage);
+      }
       setIsClaimingRewards(false);
     }
   };
