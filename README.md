@@ -30,14 +30,14 @@ No staking. No long setup. Just **connect → play → earn**.
 
 # 🚀 **Live Demo**
 
-(Provide once deployed)
-
 * **Frontend:** [https://yourapp.vercel.app](https://yourapp.vercel.app)
-* **Base Mainnet Contract Addresses:**
-
-  * TriviaGameV2: `0x...` (to be deployed)
-  * Faucet: `0x...` (to be deployed)
-* **Demo Video:** (Link after recording)
+* **Base Mainnet Contract:**
+  * **SimpleTriviaGame:** [`0xE26164De790dDC4F2aDdce1D3084Ce945Fb4c513`](https://basescan.org/address/0xE26164De790dDC4F2aDdce1D3084Ce945Fb4c513#code)
+  * **USDC Address (Payment Token):** `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+  * **Compiler Version:** `v0.8.30`
+  * **Optimization:** Enabled (200 runs)
+* **Verification:** [View on Basescan](https://basescan.org/address/0xE26164De790dDC4F2aDdce1D3084Ce945Fb4c513#code)
+* **Demo Video:** (Coming Soon)
 
 ---
 
