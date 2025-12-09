@@ -526,9 +526,9 @@ contract TriviaGameV2 is Ownable, ReentrancyGuard, VRFConsumerBaseV2 {
      * @dev Distribute weekly rewards to top players (owner only)
      */
     function distributeRewards() external onlyOwner nonReentrant {
-        require(block.timestamp >= lastRewardDistribution + REWARD_INTERVAL, "Too early");
-        require(weeklyRewardPool > 0, "No rewards to distribute");
-        require(leaderboard.length > 0, "No players");
+        if (block.timestamp < lastRewardDistribution + REWARD_INTERVAL) revert TooEarlyForDistribution();
+        if (weeklyRewardPool == 0) revert NoRewardsToDistribute();
+        if (leaderboard.length == 0) revert NoPlayers();
         
         uint256 totalRewards = weeklyRewardPool;
         
@@ -557,7 +557,7 @@ contract TriviaGameV2 is Ownable, ReentrancyGuard, VRFConsumerBaseV2 {
             }
             
             (bool success, ) = payable(leaderboard[i]).call{value: reward}("");
-            require(success, "Transfer failed");
+            if (!success) revert TransferFailed();
         }
         
         weeklyRewardPool = 0;
