@@ -431,12 +431,12 @@ contract TriviaGameV2 is Ownable, ReentrancyGuard, VRFConsumerBaseV2 {
      */
     function claimRewards() external nonReentrant {
         uint256 amount = pendingRewards[msg.sender];
-        require(amount > 0, "No rewards to claim");
+        if (amount == 0) revert NoRewardsToClaim();
         
         pendingRewards[msg.sender] = 0;
         
         (bool success, ) = payable(msg.sender).call{value: amount}("");
-        require(success, "Transfer failed");
+        if (!success) revert TransferFailed();
         
         emit RewardClaimed(msg.sender, amount);
     }
