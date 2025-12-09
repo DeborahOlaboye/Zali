@@ -81,4 +81,37 @@ contract FaucetTest is Test {
         uint256 balance = mockCUSD.balanceOf(address(faucet));
         assertEq(faucet.getContractBalance(), balance);
     }
+    
+    function test_RevertWhen_InvalidTokenAddress() public {
+        vm.expectRevert(Faucet.InvalidTokenAddress.selector);
+        new Faucet(address(0));
+    }
+    
+    function test_RevertWhen_AlreadyClaimed() public {
+        vm.startPrank(user1);
+        faucet.claim();
+        
+        vm.expectRevert(Faucet.AlreadyClaimed.selector);
+        faucet.claim();
+        vm.stopPrank();
+    }
+    
+    function test_RevertWhen_InsufficientContractBalance() public {
+        // Drain the faucet
+        vm.prank(owner);
+        faucet.withdrawTokens(mockCUSD.balanceOf(address(faucet)));
+        
+        // Try to claim
+        vm.prank(user1);
+        vm.expectRevert(Faucet.InsufficientContractBalance.selector);
+        faucet.claim();
+    }
+    
+    function test_RevertWhen_WithdrawInsufficientBalance() public {
+        uint256 balance = mockCUSD.balanceOf(address(faucet));
+        
+        vm.prank(owner);
+        vm.expectRevert(Faucet.InsufficientBalance.selector);
+        faucet.withdrawTokens(balance + 1);
+    }
 }
