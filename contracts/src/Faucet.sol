@@ -11,12 +11,14 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * @dev A contract that distributes test USDC tokens to users (one-time claim)
  */
 contract Faucet is Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+    
     // Custom Errors
     error InvalidTokenAddress();
     error AlreadyClaimed();
     error InsufficientContractBalance();
-    error TransferFailed();
     error InsufficientBalance();
+    
     IERC20 public usdcToken;
     uint256 public constant CLAIM_AMOUNT = 10 * 10**6; // 10 USDC (6 decimals)
     mapping(address => bool) public hasClaimed;
@@ -41,7 +43,7 @@ contract Faucet is Ownable, ReentrancyGuard {
         if (usdcToken.balanceOf(address(this)) < CLAIM_AMOUNT) revert InsufficientContractBalance();
 
         hasClaimed[msg.sender] = true;
-        if (!usdcToken.transfer(msg.sender, CLAIM_AMOUNT)) revert TransferFailed();
+        usdcToken.safeTransfer(msg.sender, CLAIM_AMOUNT);
 
         emit TokensClaimed(msg.sender, CLAIM_AMOUNT);
     }
@@ -52,7 +54,7 @@ contract Faucet is Ownable, ReentrancyGuard {
      */
     function withdrawTokens(uint256 amount) external onlyOwner {
         if (usdcToken.balanceOf(address(this)) < amount) revert InsufficientBalance();
-        if (!usdcToken.transfer(owner(), amount)) revert TransferFailed();
+        usdcToken.safeTransfer(owner(), amount);
         emit TokensWithdrawn(owner(), amount);
     }
 
