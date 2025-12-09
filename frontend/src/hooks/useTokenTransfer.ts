@@ -88,6 +88,7 @@ export function useTokenTransfer(): UseTokenTransferReturn {
       isWaitingForTransfer: false,
       error: null,
       txHash: null,
+      retryCount: 0,
     });
     resetApprove();
     resetTransfer();
@@ -127,12 +128,22 @@ export function useTokenTransfer(): UseTokenTransferReturn {
     } catch (error: any) {
       console.error('Approve error:', error);
       const message = error?.message || 'Failed to approve token transfer';
+      const newRetryCount = state.retryCount + 1;
+      
       setState(prev => ({
         ...prev,
         isApproving: false,
         isWaitingForApproval: false,
         error: message,
+        retryCount: newRetryCount,
       }));
+      
+      if (newRetryCount < MAX_RETRIES) {
+        toast.error(`${message}. Retry ${newRetryCount}/${MAX_RETRIES}`);
+      } else {
+        toast.error(`${message}. Max retries reached.`);
+      }
+      
       throw error;
     }
   }, [address, writeApprove]);
@@ -171,12 +182,22 @@ export function useTokenTransfer(): UseTokenTransferReturn {
     } catch (error: any) {
       console.error('Transfer error:', error);
       const message = error?.message || 'Failed to transfer tokens';
+      const newRetryCount = state.retryCount + 1;
+      
       setState(prev => ({
         ...prev,
         isTransferring: false,
         isWaitingForTransfer: false,
         error: message,
+        retryCount: newRetryCount,
       }));
+      
+      if (newRetryCount < MAX_RETRIES) {
+        toast.error(`${message}. Retry ${newRetryCount}/${MAX_RETRIES}`);
+      } else {
+        toast.error(`${message}. Max retries reached.`);
+      }
+      
       throw error;
     }
   }, [address, writeTransfer]);
