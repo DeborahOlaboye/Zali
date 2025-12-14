@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import {Script, console} from "forge-std/Script.sol";
+import {TriviaGameV2} from "../src/TriviaGameV2.sol";
+
+contract DeployMainnet is Script {
+    // Base Mainnet USDC address (CRITICAL: This is different from testnet!)
+    address constant USDC_MAINNET = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
+
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.addr(deployerPrivateKey);
+
+        console.log("========================================");
+        console.log("DEPLOYING TO BASE MAINNET");
+        console.log("========================================");
+        console.log("Deployer:", deployer);
+        console.log("USDC Address:", USDC_MAINNET);
+        console.log("Chain ID: 8453 (Base Mainnet)");
+        console.log("========================================");
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        // Deploy TriviaGameV2 contract
+        TriviaGameV2 triviaGame = new TriviaGameV2(USDC_MAINNET);
+        console.log("TriviaGameV2 deployed to:", address(triviaGame));
+
+        // Create initial games with attractive entry fees
+        console.log("\nCreating initial games...");
+
+        // Game 1: Base Basics - Easy entry for new users
+        triviaGame.createGame("Base Basics Quiz", 10);
+        console.log("Created: Base Basics Quiz (10 players)");
+
+        // Game 2: DeFi Fundamentals
+        triviaGame.createGame("DeFi Fundamentals", 15);
+        console.log("Created: DeFi Fundamentals (15 players)");
+
+        // Game 3: NFT Knowledge
+        triviaGame.createGame("NFT Knowledge", 8);
+        console.log("Created: NFT Knowledge (8 players)");
+
+        // Game 4: Crypto Security
+        triviaGame.createGame("Crypto Security", 12);
+        console.log("Created: Crypto Security (12 players)");
+
+        // Game 5: Base Ecosystem
+        triviaGame.createGame("Base Ecosystem", 20);
+        console.log("Created: Base Ecosystem (20 players)");
+
+        vm.stopBroadcast();
+
+        console.log("\n========================================");
+        console.log("DEPLOYMENT SUCCESSFUL!");
+        console.log("========================================");
+        console.log("\nIMPORTANT NEXT STEPS:");
+        console.log("1. Verify on BaseScan:");
+        console.log("   forge verify-contract --chain-id 8453 \\");
+        console.log("     --etherscan-api-key $BASESCAN_API_KEY \\");
+        console.log("     ", address(triviaGame), "\\");
+        console.log("     src/TriviaGameV2.sol:TriviaGameV2 \\");
+        console.log("     --constructor-args $(cast abi-encode 'constructor(address)' ", USDC_MAINNET, ")");
+        console.log("\n2. Update frontend .env with:");
+        console.log("   NEXT_PUBLIC_TRIVIA_GAME_ADDRESS=", address(triviaGame));
+        console.log("   NEXT_PUBLIC_NETWORK=base");
+        console.log("\n3. Seed prize pools (approve USDC first)");
+        console.log("========================================");
+    }
+}
