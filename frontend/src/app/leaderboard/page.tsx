@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { motion } from 'framer-motion';
 import { useLeaderboard } from '@/hooks/useContract';
+import { LeaderboardSkeleton, StatsCardSkeleton } from '@/components/skeletons';
 
 export default function LeaderboardPage() {
   const { isConnected } = useAccount();
-  const { leaderboardData, refetchLeaderboard } = useLeaderboard(10);
+  const { leaderboardData, leaderboardState, refetchLeaderboard } = useLeaderboard(10);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 py-8 px-4">
@@ -38,7 +39,9 @@ export default function LeaderboardPage() {
           </div>
 
           <div className="p-6">
-            {leaderboardData.length > 0 ? (
+            {leaderboardState.isLoading ? (
+              <LeaderboardSkeleton count={5} />
+            ) : leaderboardData.length > 0 ? (
               <div className="space-y-4">
                 {leaderboardData.map((player, index) => (
                   <div
@@ -90,25 +93,29 @@ export default function LeaderboardPage() {
         </motion.div>
 
         {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{leaderboardData.length}</div>
-            <div className="text-gray-600">Active Players</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{leaderboardData.reduce((sum, p) => sum + p.totalScore, 0)}</div>
-            <div className="text-gray-600">Total Score</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">Live</div>
-            <div className="text-gray-600">On-Chain Data</div>
-          </div>
-        </motion.div>
+        {leaderboardState.isLoading ? (
+          <StatsCardSkeleton count={3} />
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div className="text-3xl font-bold text-purple-600 mb-2">{leaderboardData.length}</div>
+              <div className="text-gray-600">Active Players</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">{leaderboardData.reduce((sum, p) => sum + p.totalScore, 0)}</div>
+              <div className="text-gray-600">Total Score</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div className="text-3xl font-bold text-green-600 mb-2">Live</div>
+              <div className="text-gray-600">On-Chain Data</div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

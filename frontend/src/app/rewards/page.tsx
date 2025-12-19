@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { useRewards, usePlayerRegistration, useLeaderboard } from '@/hooks/useContract';
 import { useMiniPay } from '@/hooks/useMiniPay';
 import { useCUSDBalance } from '@/hooks/useCUSDBalance';
+import { RewardCardSkeleton } from '@/components/skeletons';
 import { MiniPayRewards } from '@/components/MiniPayRewards';
 import { RewardCard } from '@/components/RewardCard';
 import { RewardItem } from '@/components/RewardItem';
@@ -289,6 +290,9 @@ export default function RewardsPage() {
                 ></div>
               </div>
               
+              {!isConnected ? (
+              <RewardCardSkeleton count={4} />
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <RewardCard 
                   icon={<TrophyIcon className="w-6 h-6" />}
@@ -339,6 +343,7 @@ export default function RewardsPage() {
                   color="text-red-500"
                 />
               </div>
+            )}
             </div>
             
             <div className="mt-6 p-4 bg-white rounded-xl border border-green-100 shadow-sm">

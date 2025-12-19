@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { sanitizeUsername } from '@/utils/sanitize';
+import { PlayerInfoSkeleton, StatsCardSkeleton } from '@/components/skeletons';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -182,57 +183,61 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white p-6 rounded-2xl shadow-lg"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-700">CELO Balance</h3>
-              <div className="text-3xl">💎</div>
-            </div>
-            <p className="text-3xl font-bold text-blue-600 mb-1">{balance}</p>
-            <p className="text-sm text-gray-600">Current wallet balance</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white p-6 rounded-2xl shadow-lg"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-700">Pending Rewards</h3>
-              <div className="text-3xl">🎁</div>
-            </div>
-            <p className="text-3xl font-bold text-green-600 mb-1">{pendingRewards}</p>
-            <p className="text-sm text-gray-600">Ready to claim</p>
-            <button
-              onClick={() => router.push('/rewards')}
-              className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm"
+        {!username ? (
+          <StatsCardSkeleton count={3} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white p-6 rounded-2xl shadow-lg"
             >
-              Claim Now
-            </button>
-          </motion.div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-700">CELO Balance</h3>
+                <div className="text-3xl">💎</div>
+              </div>
+              <p className="text-3xl font-bold text-blue-600 mb-1">{balance}</p>
+              <p className="text-sm text-gray-600">Current wallet balance</p>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white p-6 rounded-2xl shadow-lg"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-700">Accuracy</h3>
-              <div className="text-3xl">🎯</div>
-            </div>
-            <p className="text-3xl font-bold text-purple-600 mb-1">{accuracy}%</p>
-            <p className="text-sm text-gray-600">
-              {correctAnswers.toString()}/{totalQuestions.toString()} correct
-            </p>
-          </motion.div>
-        </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white p-6 rounded-2xl shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-700">Pending Rewards</h3>
+                <div className="text-3xl">🎁</div>
+              </div>
+              <p className="text-3xl font-bold text-green-600 mb-1">{pendingRewards}</p>
+              <p className="text-sm text-gray-600">Ready to claim</p>
+              <button
+                onClick={() => router.push('/rewards')}
+                className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm"
+              >
+                Claim Now
+              </button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white p-6 rounded-2xl shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-700">Accuracy</h3>
+                <div className="text-3xl">🎯</div>
+              </div>
+              <p className="text-3xl font-bold text-purple-600 mb-1">{accuracy}%</p>
+              <p className="text-sm text-gray-600">
+                {correctAnswers.toString()}/{totalQuestions.toString()} correct
+              </p>
+            </motion.div>
+          </div>
+        )}
 
         {/* Detailed Stats */}
         <motion.div

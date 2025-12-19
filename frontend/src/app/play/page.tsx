@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { usePlayerRegistration, useGameSession, useCeloBalance, useContractInfo, useQuestions } from '@/hooks/useContract';
+import { PlayerInfoSkeleton, StatsCardSkeleton } from '@/components/skeletons';
 import { GAME_CONSTANTS } from '@/config/contracts';
 
 
@@ -163,41 +164,47 @@ export default function PlayPage() {
         </div>
         
         {/* User Info (if registered) */}
-        {isRegistered && username && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-purple-200"
-          >
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-center md:text-left">
-                <p className="text-sm text-gray-600">Welcome back,</p>
-                <h2 className="text-2xl font-bold text-gray-900">{username}</h2>
-              </div>
-              <div className="grid grid-cols-3 gap-6">
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">Total Score</p>
-                  <p className="text-xl font-bold text-purple-600">{totalScore.toString()}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">Games Played</p>
-                  <p className="text-xl font-bold text-blue-600">{gamesPlayed.toString()}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">CELO Balance</p>
-                  <p className="text-xl font-bold text-green-600">{balance}</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => router.push('/rewards')}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all"
+        {isConnected && (
+          <>
+            {!isRegistered ? null : username ? (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-purple-200"
               >
-                💰 View & Claim Rewards
-              </button>
-            </div>
-          </motion.div>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div className="text-center md:text-left">
+                    <p className="text-sm text-gray-600">Welcome back,</p>
+                    <h2 className="text-2xl font-bold text-gray-900">{username}</h2>
+                  </div>
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Total Score</p>
+                      <p className="text-xl font-bold text-purple-600">{totalScore.toString()}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Games Played</p>
+                      <p className="text-xl font-bold text-blue-600">{gamesPlayed.toString()}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">CELO Balance</p>
+                      <p className="text-xl font-bold text-green-600">{balance}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => router.push('/rewards')}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all"
+                  >
+                    💰 View & Claim Rewards
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <PlayerInfoSkeleton />
+            )}
+          </>
         )}
 
         {/* Registration Required Notice */}
@@ -318,42 +325,46 @@ export default function PlayPage() {
         </motion.div>
         
         {/* Rewards Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-xl p-8 mb-12"
-        >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            💰 Earning Potential
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-green-50 rounded-xl">
-              <div className="text-3xl mb-2">✅</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Per Correct Answer</h3>
-              <p className="text-2xl font-bold text-green-600 mb-1">
-                {GAME_CONSTANTS.REWARD_PER_CORRECT} CELO
-              </p>
-              <p className="text-sm text-gray-600">Earn for each right answer</p>
+        {!isConnected ? (
+          <StatsCardSkeleton count={3} />
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-2xl shadow-xl p-8 mb-12"
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              💰 Earning Potential
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-green-50 rounded-xl">
+                <div className="text-3xl mb-2">✅</div>
+                <h3 className="font-semibold text-gray-900 mb-2">Per Correct Answer</h3>
+                <p className="text-2xl font-bold text-green-600 mb-1">
+                  {GAME_CONSTANTS.REWARD_PER_CORRECT} CELO
+                </p>
+                <p className="text-sm text-gray-600">Earn for each right answer</p>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-xl">
+                <div className="text-3xl mb-2">🎯</div>
+                <h3 className="font-semibold text-gray-900 mb-2">Perfect Score Bonus</h3>
+                <p className="text-2xl font-bold text-purple-600 mb-1">
+                  {GAME_CONSTANTS.PERFECT_SCORE_BONUS} CELO
+                </p>
+                <p className="text-sm text-gray-600">Get all 10 correct!</p>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-xl">
+                <div className="text-3xl mb-2">⚡</div>
+                <h3 className="font-semibold text-gray-900 mb-2">Speed Bonus</h3>
+                <p className="text-2xl font-bold text-blue-600 mb-1">
+                  Up to {GAME_CONSTANTS.MAX_SPEED_BONUS} CELO
+                </p>
+                <p className="text-sm text-gray-600">Answer faster!</p>
+              </div>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-xl">
-              <div className="text-3xl mb-2">🎯</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Perfect Score Bonus</h3>
-              <p className="text-2xl font-bold text-purple-600 mb-1">
-                {GAME_CONSTANTS.PERFECT_SCORE_BONUS} CELO
-              </p>
-              <p className="text-sm text-gray-600">Get all 10 correct!</p>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-xl">
-              <div className="text-3xl mb-2">⚡</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Speed Bonus</h3>
-              <p className="text-2xl font-bold text-blue-600 mb-1">
-                Up to {GAME_CONSTANTS.MAX_SPEED_BONUS} CELO
-              </p>
-              <p className="text-sm text-gray-600">Answer faster!</p>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* How It Works Section */}
         <motion.div
