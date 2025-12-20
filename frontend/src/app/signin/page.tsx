@@ -171,7 +171,7 @@ export default function SignInPage() {
           <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Welcome to Zali
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600" role="status" aria-live="polite">
             {getStatusMessage()}
           </p>
         </motion.div>
@@ -194,55 +194,61 @@ export default function SignInPage() {
               )}
             </AnimatePresence>
 
-            <div className="space-y-4">
-              {connectors
-                .filter((connector) => connector.ready)
-                .map((connector) => {
-                  const connectorInfo = availableConnectors.find(c => c.id === connector.id) || {
-                    id: connector.id,
-                    name: connector.name,
-                    icon: '🔗',
-                    description: `Connect with ${connector.name}`
-                  };
-                  
-                  const isActive = activeConnector?.id === connector.id && 
-                                (connectionState === 'connecting' || connectionState === 'connected');
-                  
-                  return (
-                    <motion.button
-                      key={connector.id}
-                      onClick={() => handleConnect(connector)}
-                      disabled={isLoading || isActive}
-                      className={`w-full flex items-center justify-between px-6 py-4 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
-                        isActive
-                          ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-inner'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed'
-                      }`}
-                      whileHover={isActive ? {} : { scale: 1.02, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
-                      whileTap={isActive ? {} : { scale: 0.98 }}
-                      aria-busy={isActive}
-                    >
-                      <span className="text-xl mr-3">{connectorInfo.icon}</span>
-                      <div className="flex-1 text-left">
-                        <div className="font-semibold">{connectorInfo.name}</div>
-                        <div className="text-xs text-gray-500">{connectorInfo.description}</div>
-                      </div>
-                      {isActive && (
-                        <div className="ml-2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                      )}
-                    </motion.button>
-                  );
-                })}
+            <fieldset>
+              <legend className="text-sm font-medium text-gray-900 mb-4">Connect your wallet</legend>
+              <div className="space-y-4">
+                {connectors
+                  .filter((connector) => connector.ready)
+                  .map((connector) => {
+                    const connectorInfo = availableConnectors.find(c => c.id === connector.id) || {
+                      id: connector.id,
+                      name: connector.name,
+                      icon: '🔗',
+                      description: `Connect with ${connector.name}`
+                    };
+                    
+                    const isActive = activeConnector?.id === connector.id && 
+                                  (connectionState === 'connecting' || connectionState === 'connected');
+                    
+                    return (
+                      <motion.button
+                        key={connector.id}
+                        onClick={() => handleConnect(connector)}
+                        disabled={isLoading || isActive}
+                        className={`w-full flex items-center justify-between px-6 py-4 border-2 rounded-xl text-base font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                          isActive
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-inner focus:ring-blue-600'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-gray-50 hover:shadow-md focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed'
+                        }`}
+                        whileHover={isActive ? {} : { scale: 1.02, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
+                        whileTap={isActive ? {} : { scale: 0.98 }}
+                        aria-busy={isActive}
+                        aria-label={isActive ? `${connectorInfo.name} - connecting` : `Connect with ${connectorInfo.name}`}
+                      >
+                        <span className="text-xl mr-3" aria-hidden="true">{connectorInfo.icon}</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">{connectorInfo.name}</div>
+                          <div className="text-xs text-gray-500">{connectorInfo.description}</div>
+                        </div>
+                        {isActive && (
+                          <div className="ml-2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" aria-hidden="true"></div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+              </div>
+            </fieldset>
               
               {/* Help section */}
               <div className="pt-4 mt-6 border-t border-gray-100">
                 <p className="text-xs text-center text-gray-500">
                   Need help connecting?{' '}
                   <button 
-                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-1"
                     onClick={() => {
                       setConnectionError('For help, please ensure you have a Web3 wallet installed and try again.');
                     }}
+                    aria-label="Get help connecting wallet"
                   >
                     Get help
                   </button>
