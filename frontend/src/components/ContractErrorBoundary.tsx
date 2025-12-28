@@ -4,6 +4,7 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import { ContractError, ContractErrorType, parseContractError } from '@/utils/contractErrors';
 import { useAccount, useSwitchChain } from 'wagmi';
 import { CONTRACTS } from '@/config/contracts';
+import { errorLogger } from '@/utils/errorLogger';
 
 // Fallback UI components in case shadcn/ui is not available
 const Button = ({ 
@@ -117,10 +118,20 @@ export class ContractErrorBoundary extends Component<ContractErrorBoundaryProps,
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const contractError = error as ContractError;
+    
+    // Log the error
+    errorLogger.logError(error, {
+      component: 'ContractErrorBoundary',
+      errorCode: contractError.code,
+      details: contractError.details,
+      componentStack: errorInfo.componentStack,
+    }, 'critical');
+    
     console.error('ContractErrorBoundary caught an error:', error, errorInfo);
     
     // Update state with the error info
-    this.setState({ error: error as ContractError, errorInfo });
+    this.setState({ error: contractError, errorInfo });
     
     // Call the onError handler if provided
     this.props.onError?.(error, errorInfo);
