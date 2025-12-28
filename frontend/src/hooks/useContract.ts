@@ -3,6 +3,8 @@ import { CONTRACTS, GAME_CONSTANTS } from '@/config/contracts';
 import { parseEther, formatEther } from 'viem';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getRandomQuestions } from '@/data/questions';
+import { useTransactionLoading } from './useTransactionLoading';
+import { TransactionState } from '@/types/transaction';
 
 // Type for loading states
 export interface LoadingState {

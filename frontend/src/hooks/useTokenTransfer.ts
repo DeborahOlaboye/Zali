@@ -4,6 +4,8 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { CONTRACTS } from '@/config/contracts';
 import { toast } from 'react-hot-toast';
 import { createContractError, ContractErrorType } from '@/utils/contractErrors';
+import { useTransactionLoading } from './useTransactionLoading';
+import type { UseTransactionLoadingReturn } from '@/types/transaction';
 
 type TransferState = {
   isApproving: boolean;
@@ -32,6 +34,8 @@ type UseTokenTransferReturn = {
   
   /** Current transfer state */
   state: TransferState;
+  approveTx?: UseTransactionLoadingReturn;
+  transferTx?: UseTransactionLoadingReturn;
   
   /** Reset the transfer state */
   reset: () => void;
@@ -177,6 +181,10 @@ export function useTokenTransfer(): UseTokenTransferReturn {
     hash: transferData,
   });
 
+  // Transaction loading hooks for more detailed states
+  const approveTx = useTransactionLoading({ enableProgressTracking: true });
+  const transferTx = useTransactionLoading({ enableProgressTracking: true });
+
   // Reset state
   const reset = useCallback(() => {
     setState({
@@ -190,6 +198,8 @@ export function useTokenTransfer(): UseTokenTransferReturn {
     });
     resetApprove();
     resetTransfer();
+    approveTx.reset();
+    transferTx.reset();
   }, [resetApprove, resetTransfer]);
 
   // Handle approval transaction
@@ -205,6 +215,9 @@ export function useTokenTransfer(): UseTokenTransferReturn {
     }
 
     try {
+      // start transaction loading
+      approveTx && (approveTx as any).state && approveTx.reset();
+      approveTx.startLoading?.();
       const amountWei = parseEther(amount);
       
       setState({
@@ -222,8 +235,9 @@ export function useTokenTransfer(): UseTokenTransferReturn {
         functionName: 'approve',
         args: [spender, amountWei],
       });
-
     } catch (error: any) {
+      // mark failed in tx hook
+      approveTx.markFailed?.(error instanceof Error ? error : new Error('Approve failed'));
       console.error('Approve error:', error);
       const message = parseContractError(error);
       const newRetryCount = state.retryCount + 1;
@@ -245,7 +259,6 @@ export function useTokenTransfer(): UseTokenTransferReturn {
       throw error;
     }
   }, [address, writeApprove]);
-
   // Handle transfer transaction
   const transfer = useCallback(async (to: Address, amount: string) => {
     if (!address) {
@@ -259,6 +272,9 @@ export function useTokenTransfer(): UseTokenTransferReturn {
     }
 
     try {
+      // start transaction loading
+      transferTx && (transferTx as any).state && transferTx.reset();
+      transferTx.startLoading?.();
       const amountWei = parseEther(amount);
       
       setState({
@@ -278,6 +294,8 @@ export function useTokenTransfer(): UseTokenTransferReturn {
       });
 
     } catch (error: any) {
+      // mark failed in tx hook
+      transferTx.markFailed?.(error instanceof Error ? error : new Error('Transfer failed'));
       console.error('Transfer error:', error);
       const message = parseContractError(error);
       const newRetryCount = state.retryCount + 1;
@@ -304,6 +322,8 @@ export function useTokenTransfer(): UseTokenTransferReturn {
   useEffect(() => {
     if (isApproveError) {
       const message = parseContractError(approveError);
+      // mark failed in tx hook
+      approveTx.markFailed?.(approveError instanceof Error ? approveError : new Error(message));
       setState(prev => ({
         ...prev,
         isApproving: false,
@@ -318,6 +338,8 @@ export function useTokenTransfer(): UseTokenTransferReturn {
   useEffect(() => {
     if (isTransferError) {
       const message = parseContractError(transferError);
+      // mark failed in tx hook
+      transferTx.markFailed?.(transferError instanceof Error ? transferError : new Error(message));
       setState(prev => ({
         ...prev,
         isTransferring: false,
@@ -331,6 +353,11 @@ export function useTokenTransfer(): UseTokenTransferReturn {
   // Handle successful approval
   useEffect(() => {
     if (isApproveSuccess) {
+      // update tx hook with submitted hash and mark success
+      if (approveData) {
+        approveTx.updateSubmitted?.(approveData as any, address as any);
+      }
+      approveTx.markSuccess?.();
 setState(prev => ({
         ...prev,
         isApproving: false,
@@ -344,6 +371,11 @@ setState(prev => ({
   // Handle successful transfer
   useEffect(() => {
     if (isTransferSuccess) {
+      // update tx hook with submitted hash and mark success
+      if (transferData) {
+        transferTx.updateSubmitted?.(transferData as any, address as any);
+      }
+      transferTx.markSuccess?.();
 setState(prev => ({
         ...prev,
         isTransferring: false,
@@ -358,6 +390,8 @@ setState(prev => ({
     transfer,
     approve,
     state,
+    approveTx,
+    transferTx,
     reset,
   };
 }
