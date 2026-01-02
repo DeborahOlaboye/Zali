@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { CONTRACTS } from '@/config/contracts';
 import { useFaucet } from '@/hooks/useContract';
+import { LoadingButton, useLoading } from '@/components/loading';
 
 export default function FaucetPage() {
   const { address } = useAccount();
+  const { setLoading, clearLoading } = useLoading({ component: 'faucet-page' });
   const { 
     claim, 
     claimIsLoading, 
@@ -34,9 +36,15 @@ export default function FaucetPage() {
 
   const handleClaim = async () => {
     setError(null);
+    setLoading(true, 'Claiming cUSD tokens...', 25);
+    
     try {
+      setLoading(true, 'Processing transaction...', 50);
       await claim?.();
+      setLoading(true, 'Transaction successful!', 100);
+      clearLoading();
     } catch (err: any) {
+      clearLoading();
       setError(err.message || 'Failed to claim cUSD');
     }
   };
@@ -81,23 +89,21 @@ export default function FaucetPage() {
               </div>
             </div>
             
-            <button
+            <LoadingButton
               onClick={handleClaim}
-              disabled={!address || claimIsLoading || isClaimed}
-              className={`w-full py-3 px-4 rounded-md font-medium text-white ${
-                !address || claimIsLoading || isClaimed
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700'
-              }`}
+              disabled={!address || isClaimed}
+              isLoading={claimIsLoading}
+              loadingText="Claiming..."
+              variant="secondary"
+              size="lg"
+              className="w-full bg-green-600 hover:bg-green-700"
             >
               {!address 
                 ? 'Connect Wallet to Claim' 
-                : claimIsLoading 
-                  ? 'Claiming...' 
-                  : isClaimed 
-                    ? 'Claimed!'
-                    : 'Claim cUSD'}
-            </button>
+                : isClaimed 
+                  ? 'Claimed!'
+                  : 'Claim cUSD'}
+            </LoadingButton>
             
             {error && (
               <div className="mt-4 text-red-400 text-sm">
