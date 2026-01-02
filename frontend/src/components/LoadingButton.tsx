@@ -3,27 +3,27 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { LoadingSpinner } from './LoadingSpinner';
+import { ButtonProps, ButtonVariant, ButtonSize } from '@/types/components';
 
-interface LoadingButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps extends ButtonProps {
   isLoading?: boolean;
   loadingText?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  children: ReactNode;
 }
 
-const variantClasses = {
+const variantClasses: Record<ButtonVariant, string> = {
   primary: 'bg-blue-600 hover:bg-blue-700 text-white',
   secondary: 'bg-green-600 hover:bg-green-700 text-white',
   outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white',
   ghost: 'text-blue-600 hover:bg-blue-50',
-};
+  danger: 'bg-red-600 hover:bg-red-700 text-white',
+} as const;
 
-const sizeClasses = {
+const sizeClasses: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-base',
   lg: 'px-6 py-3 text-lg',
-};
+  xl: 'px-8 py-4 text-xl',
+} as const;
 
 const disabledClasses = 'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-current';
 
@@ -35,9 +35,10 @@ export function LoadingButton({
   children,
   disabled,
   className = '',
+  'data-testid': testId,
   ...props
 }: LoadingButtonProps) {
-  const isDisabled = disabled || isLoading;
+  const isDisabled: boolean = disabled || isLoading;
 
   return (
     <motion.button
@@ -53,7 +54,8 @@ export function LoadingButton({
         ${className}
       `}
       disabled={isDisabled}
-      {...props}
+      data-testid={testId}
+      {...props}}
     >
       {isLoading && (
         <LoadingSpinner
