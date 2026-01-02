@@ -32,7 +32,7 @@ export function LoadingSpinner({
   className = '',
 }: LoadingSpinnerProps) {
   return (
-    <div className={`flex flex-col items-center justify-center ${className}`}>
+    <div className={`flex flex-col items-center justify-center ${className}`} role="status" aria-live="polite">
       <motion.div
         className={`border-2 rounded-full ${sizeClasses[size]} ${colorClasses[color]}`}
         animate={{ rotate: 360 }}
@@ -41,10 +41,11 @@ export function LoadingSpinner({
           repeat: Infinity,
           ease: 'linear',
         }}
+        aria-hidden="true"
       />
       
       {progress !== undefined && (
-        <div className="mt-2 w-32 bg-gray-200 rounded-full h-2">
+        <div className="mt-2 w-32 bg-gray-200 rounded-full h-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
           <motion.div
             className="bg-blue-600 h-2 rounded-full"
             initial={{ width: 0 }}
@@ -59,6 +60,7 @@ export function LoadingSpinner({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="mt-2 text-sm text-gray-600 text-center"
+          aria-live="polite"
         >
           {message}
         </motion.p>
