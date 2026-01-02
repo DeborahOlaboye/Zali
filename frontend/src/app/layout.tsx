@@ -7,6 +7,7 @@ import { SkipNavLink } from "@/components/SkipNavLink";
 import { Toaster } from "react-hot-toast";
 import { AutoFaucetProvider } from "@/contexts/AutoFaucetContext";
 import { LoadingProvider } from "@/components/LoadingProvider";
+import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,14 +28,16 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen`}>
         <Providers>
           <LoadingProvider>
-            <AutoFaucetProvider>
-              <SkipNavLink />
-              <Navbar />
-              <main id="main-content" className="min-h-screen">
-                {children}
-              </main>
-              <Toaster position="top-right" />
-            </AutoFaucetProvider>
+            <RouteErrorBoundary>
+              <AutoFaucetProvider>
+                <SkipNavLink />
+                <Navbar />
+                <main id="main-content" className="min-h-screen">
+                  {children}
+                </main>
+                <Toaster position="top-right" />
+              </AutoFaucetProvider>
+            </RouteErrorBoundary>
           </LoadingProvider>
         </Providers>
       </body>
