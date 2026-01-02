@@ -5,20 +5,36 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAccount, useDisconnect } from 'wagmi';
 import { AnimatePresence, motion } from 'framer-motion';
+import { NavbarProps, NavLinkProps } from '@/types/components';
+import { Address } from '@/types/web3';
+
+interface AppKitInstance {
+  open: () => void;
+}
+
+interface UseClientAppKitReturn {
+  open: () => void;
+  isReady: boolean;
+}
+
+interface NavLink {
+  readonly name: string;
+  readonly href: string;
+}
 
 // Client-side AppKit hook
-function useClientAppKit() {
-  const [appKit, setAppKit] = useState<any>(null);
-  const [isReady, setIsReady] = useState(false);
+function useClientAppKit(): UseClientAppKitReturn {
+  const [appKit, setAppKit] = useState<AppKitInstance | null>(null);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const { useAppKit } = require('@reown/appkit/react');
-        const kit = useAppKit();
+        const kit: AppKitInstance = useAppKit();
         setAppKit(kit);
         setIsReady(true);
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('AppKit not available:', error);
         setIsReady(true); // Still set ready to avoid infinite loading
       }
@@ -37,15 +53,18 @@ function useClientAppKit() {
   };
 }
 
-export default function Navbar() {
+export default function Navbar({ className = '', 'data-testid': testId }: NavbarProps = {}) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
   const { open, isReady } = useClientAppKit();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
+
+  // Type-safe address handling
+  const formattedAddress = address as Address | undefined;
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -88,15 +107,15 @@ export default function Navbar() {
     };
   }, [mobileMenuOpen]);
 
-  const navLinks = [
+  const navLinks: readonly NavLink[] = [
     { name: 'Home', href: '/' },
     { name: 'Play', href: '/play' },
     { name: 'Rewards', href: '/rewards' },
     { name: 'Leaderboard', href: '/leaderboard' },
-  ];
+  ] as const;
 
   return (
-    <nav className="border-b border-gray-200 bg-white shadow-sm">
+    <nav className={`border-b border-gray-200 bg-white shadow-sm ${className}`} data-testid={testId}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -133,9 +152,9 @@ export default function Navbar() {
                   <button
                     onClick={() => open()}
                     className="px-3 py-2 text-sm bg-green-100 text-green-700 hover:bg-green-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
-                    aria-label={`Connected wallet: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
+                    aria-label={`Connected wallet: ${formattedAddress?.slice(0, 6)}...${formattedAddress?.slice(-4)}`}
                   >
-                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                    {formattedAddress?.slice(0, 6)}...{formattedAddress?.slice(-4)}
                   </button>
                   <button
                     onClick={() => disconnect()}
@@ -169,9 +188,9 @@ export default function Navbar() {
                   <button
                     onClick={() => open()}
                     className="px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-600"
-                    aria-label={`Connected wallet: ${address?.slice(0, 4)}...${address?.slice(-2)}`}
+                    aria-label={`Connected wallet: ${formattedAddress?.slice(0, 4)}...${formattedAddress?.slice(-2)}`}
                   >
-                    {address?.slice(0, 4)}...{address?.slice(-2)}
+                    {formattedAddress?.slice(0, 4)}...{formattedAddress?.slice(-2)}
                   </button>
                   <button
                     onClick={() => disconnect()}
@@ -310,9 +329,9 @@ export default function Navbar() {
                           setMobileMenuOpen(false);
                         }}
                         className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-inset"
-                        aria-label={`Connected wallet: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
+                        aria-label={`Connected wallet: ${formattedAddress?.slice(0, 6)}...${formattedAddress?.slice(-4)}`}
                       >
-                        Wallet: {address?.slice(0, 6)}...{address?.slice(-4)}
+                        Wallet: {formattedAddress?.slice(0, 6)}...{formattedAddress?.slice(-4)}
                       </button>
                       <button
                         onClick={() => {
