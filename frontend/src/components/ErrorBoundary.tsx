@@ -3,6 +3,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { errorLogger } from '@/utils/errorLogger';
 import { analyzeError, getErrorMessage, isRecoverableError } from '@/utils/errorAnalyzer';
+import { globalRecoveryManager } from '@/utils/errorRecovery';
 import { ErrorSeverity } from '@/types/errorBoundary';
 
 interface ErrorBoundaryProps {
@@ -13,6 +14,7 @@ interface ErrorBoundaryProps {
   name?: string;
   enableLogging?: boolean;
   showDetails?: boolean;
+  enableAutoRecovery?: boolean;
 }
 
 interface ErrorBoundaryState {
@@ -43,13 +45,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    const { onError, enableLogging = true, name, level = 'component' } = this.props;
+    const { onError, enableLogging = true, name, level = 'component', enableAutoRecovery = true } = this.props;
 
     // Update state with error info and increment count
     this.setState(prev => ({
       errorInfo,
       errorCount: prev.errorCount + 1,
     }));
+
+    // Attempt automatic recovery if enabled
+    if (enableAutoRecovery) {
+      this.attemptAutoRecovery(error);
+    }
 
     // Log the error
     if (enableLogging) {
@@ -80,6 +87,20 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       clearTimeout(this.resetTimeout);
     }
   }
+
+  private attemptAutoRecovery = async (error: Error) => {
+    try {
+      const recovered = await globalRecoveryManager.attemptRecovery(error);
+      if (recovered) {
+        // Auto-reset after successful recovery
+        setTimeout(() => {
+          this.handleReset();
+        }, 1000);
+      }
+    } catch (recoveryError) {
+      console.warn('Auto-recovery failed:', recoveryError);
+    }
+  };
 
   private determineSeverity(error: Error): ErrorSeverity {
     const analysis = analyzeError(error);
