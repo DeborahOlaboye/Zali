@@ -8,6 +8,7 @@ import { registrationSchema, RegistrationFormData } from '@/utils/validations/au
 import { useSanitizedForm } from '@/hooks/useSanitizedForm';
 import { usePlayerRegistration } from '@/hooks/useContract';
 import { LoadingButton, LoadingCard, useLoading } from '@/components/loading';
+import { FormErrorBoundary } from '@/components/FormErrorBoundary';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -115,7 +116,8 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full" noValidate>
+      <FormErrorBoundary formName="Registration">
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full" noValidate>
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 text-gray-800">
             Register Your Username
@@ -247,6 +249,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </form>
+      </FormErrorBoundary>
     </div>
   );
 }
