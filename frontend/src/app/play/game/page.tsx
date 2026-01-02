@@ -10,6 +10,7 @@ import { calculateScore } from '@/data/questions';
 import { useAccount } from 'wagmi';
 import toast from 'react-hot-toast';
 import { useGameSession, useGameQuestions } from '@/hooks/useContract';
+import { LoadingCard, LoadingSpinner, useLoading } from '@/components/loading';
 
 interface Question {
   id: number;
@@ -27,6 +28,7 @@ export default function GamePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { address, isConnected } = useAccount();
+  const { setLoading, clearLoading, updateProgress, updateMessage } = useLoading({ component: 'game-page' });
   
   const gameId = searchParams.get('gameId') || '1';
   
@@ -105,17 +107,21 @@ export default function GamePage() {
 
   const finishGame = async (finalAnswers: number[], finalTimeSpent: number[]) => {
     setIsLoading(true);
-    
-    // Show submitting message immediately
-    toast.loading('Submitting answers to blockchain...', { id: 'submit-answers' });
+    setLoading(true, 'Preparing to submit answers...', 10);
     
     try {
       if (address) {
+        updateMessage('Getting session information...');
+        updateProgress(25);
+        
         // Get the latest session ID
         const sessionId = getLatestSession();
         console.log('Latest session ID:', sessionId);
         
         if (sessionId !== null) {
+          updateMessage('Submitting answers to blockchain...');
+          updateProgress(50);
+          
           // Submit answers to smart contract and wait for completion
           console.log('Submitting answers:', finalAnswers);
           
@@ -123,14 +129,17 @@ export default function GamePage() {
           submitAnswers(BigInt(sessionId), finalAnswers);
           console.log('Submit answers called for session:', sessionId);
           
+          updateMessage('Waiting for blockchain confirmation...');
+          updateProgress(75);
+          
         } else {
-          toast.dismiss('submit-answers');
+          clearLoading();
           toast.error('No active session found');
           setIsLoading(false);
           return;
         }
       } else {
-        toast.dismiss('submit-answers');
+        clearLoading();
         toast.error('Wallet not connected');
         setIsLoading(false);
         return;
@@ -138,7 +147,7 @@ export default function GamePage() {
       
     } catch (error) {
       console.error('Error submitting to contract:', error);
-      toast.dismiss('submit-answers');
+      clearLoading();
       toast.error('Failed to submit answers to blockchain');
       setIsLoading(false);
       return;
@@ -148,7 +157,9 @@ export default function GamePage() {
   // Watch for successful submission
   useEffect(() => {
     if (submitIsSuccess && isLoading) {
-      toast.dismiss('submit-answers');
+      updateMessage('Answers submitted successfully!');
+      updateProgress(100);
+      
       toast.success('Answers submitted successfully!');
       
       // Calculate score and navigate to results
@@ -160,6 +171,7 @@ export default function GamePage() {
       const score = calculateScore(finalAnswers, questions);
       
       setTimeout(() => {
+        clearLoading();
         toast.success(`Game complete! You scored ${score.correct}/${score.total}!`);
         
         setTimeout(() => {
@@ -169,15 +181,16 @@ export default function GamePage() {
       
       setIsLoading(false);
     }
-  }, [submitIsSuccess, isLoading, answers, questions, router, gameId]);
+  }, [submitIsSuccess, isLoading, answers, questions, router, gameId, updateMessage, updateProgress, clearLoading]);
 
   if (!isConnected) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Connecting wallet...</p>
-        </div>
+        <LoadingCard
+          title="Connecting Wallet"
+          message="Please wait while we connect to your wallet..."
+          className="max-w-md"
+        />
       </div>
     );
   }
@@ -185,12 +198,11 @@ export default function GamePage() {
   if (isLoading || isLoadingQuestions) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-700">
-            {isLoadingQuestions ? 'Loading questions...' : 'Processing...'}
-          </p>
-        </div>
+        <LoadingCard
+          title={isLoadingQuestions ? "Loading Questions" : "Processing Game"}
+          message={isLoadingQuestions ? "Fetching questions from the blockchain..." : "Please wait while we process your game..."}
+          className="max-w-md"
+        />
       </div>
     );
   }
