@@ -46,6 +46,20 @@ The application includes a powerful async loading states system for managing asy
 - **Skeleton Loaders** - For table, list, and form loading states
 - **Progress Tracking** - Multi-step operation visualization
 
+## Mobile Responsiveness
+
+The application features a comprehensive mobile responsiveness system for building adaptive UIs. See [MOBILE_RESPONSIVENESS.md](./MOBILE_RESPONSIVENESS.md) for detailed documentation.
+
+### Features
+
+- **Media Query Hooks** - Custom and predefined breakpoint detection
+- **Responsive Containers** - Adaptive layouts and grids
+- **Mobile Menu** - Slide-in navigation with animations
+- **Responsive Forms** - Mobile-optimized input components
+- **Responsive Typography** - Adaptive font sizes
+- **Responsive Tables** - Card view on mobile devices
+- **Touch-Friendly Buttons** - Optimized for mobile interaction
+
 ### Quick Example
 
 ```tsx
