@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useLeaderboard } from '@/hooks/useContract';
 import { LeaderboardSkeleton, StatsCardSkeleton } from '@/components/skeletons';
 import { LoadingButton, LoadingCard, useLoading } from '@/components/loading';
+import { RetryableOperation, RetryUI, AsyncBoundary } from '@/async';
 
 export default function LeaderboardPage() {
   const { isConnected } = useAccount();
