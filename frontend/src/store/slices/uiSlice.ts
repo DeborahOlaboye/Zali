@@ -8,13 +8,25 @@ export type Notification = {
   duration?: number;
 };
 
+export interface LoadingState {
+  isLoading: boolean;
+  message?: string;
+  progress?: number;
+}
+
 export interface UISlice {
   theme: Theme;
   notifications: Notification[];
+  globalLoading: LoadingState;
+  componentLoading: Record<string, LoadingState>;
   setTheme: (theme: Theme) => void;
   addNotification: (notification: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
+  setGlobalLoading: (loading: LoadingState) => void;
+  setComponentLoading: (component: string, loading: LoadingState) => void;
+  clearComponentLoading: (component: string) => void;
+  clearAllLoading: () => void;
 }
 
 export const createUISlice: StateCreator<
@@ -25,6 +37,8 @@ export const createUISlice: StateCreator<
 > = (set, get) => ({
   theme: 'system',
   notifications: [],
+  globalLoading: { isLoading: false },
+  componentLoading: {},
 
   setTheme: (theme) => {
     set({ theme }, false, 'ui/setTheme');
@@ -73,5 +87,40 @@ export const createUISlice: StateCreator<
 
   clearNotifications: () => {
     set({ notifications: [] }, false, 'ui/clearNotifications');
+  },
+
+  setGlobalLoading: (loading) => {
+    set({ globalLoading: loading }, false, 'ui/setGlobalLoading');
+  },
+
+  setComponentLoading: (component, loading) => {
+    set(
+      (state) => {
+        state.componentLoading[component] = loading;
+      },
+      false,
+      'ui/setComponentLoading'
+    );
+  },
+
+  clearComponentLoading: (component) => {
+    set(
+      (state) => {
+        delete state.componentLoading[component];
+      },
+      false,
+      'ui/clearComponentLoading'
+    );
+  },
+
+  clearAllLoading: () => {
+    set(
+      {
+        globalLoading: { isLoading: false },
+        componentLoading: {},
+      },
+      false,
+      'ui/clearAllLoading'
+    );
   },
 });
