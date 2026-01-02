@@ -4,9 +4,13 @@ export { RouteErrorBoundary } from './RouteErrorBoundary';
 export { FormErrorBoundary } from './FormErrorBoundary';
 export { QueryErrorBoundary } from './QueryErrorBoundary';
 export { SuspenseErrorBoundary } from './SuspenseErrorBoundary';
+export { TokenTransferErrorBoundary } from './TokenTransferErrorBoundary';
+export { TransactionErrorBoundary } from './TransactionErrorBoundary';
+export { WalletErrorBoundary } from './WalletErrorBoundary';
 
 // Error Handling Hooks
 export { useGlobalErrorHandler } from '../hooks/useGlobalErrorHandler';
+export { useTokenTransferErrorHandler } from '../hooks/useTokenTransferErrorHandler';
 
 // Error Recovery Utilities
 export { 
