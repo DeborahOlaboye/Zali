@@ -5,6 +5,7 @@ import { useAccount, useBalance } from 'wagmi';
 import { CONTRACTS } from '@/config/contracts';
 import { useFaucet } from '@/hooks/useContract';
 import { LoadingButton, useLoading } from '@/components/loading';
+import { TokenTransferErrorBoundary } from '@/components/TokenTransferErrorBoundary';
 
 export default function FaucetPage() {
   const { address } = useAccount();
@@ -89,21 +90,27 @@ export default function FaucetPage() {
               </div>
             </div>
             
-            <LoadingButton
-              onClick={handleClaim}
-              disabled={!address || isClaimed}
-              isLoading={claimIsLoading}
-              loadingText="Claiming..."
-              variant="secondary"
-              size="lg"
-              className="w-full bg-green-600 hover:bg-green-700"
+            <TokenTransferErrorBoundary
+              tokenSymbol="cUSD"
+              amount={claimAmount.data ? formatAmount(claimAmount.data) : '0'}
+              onRetry={() => handleClaim()}
             >
-              {!address 
-                ? 'Connect Wallet to Claim' 
-                : isClaimed 
-                  ? 'Claimed!'
-                  : 'Claim cUSD'}
-            </LoadingButton>
+              <LoadingButton
+                onClick={handleClaim}
+                disabled={!address || isClaimed}
+                isLoading={claimIsLoading}
+                loadingText="Claiming..."
+                variant="secondary"
+                size="lg"
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {!address 
+                  ? 'Connect Wallet to Claim' 
+                  : isClaimed 
+                    ? 'Claimed!'
+                    : 'Claim cUSD'}
+              </LoadingButton>
+            </TokenTransferErrorBoundary>
             
             {error && (
               <div className="mt-4 text-red-400 text-sm">
