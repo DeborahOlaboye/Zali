@@ -2,25 +2,26 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { QuestionCardProps } from '@/types/components';
 import type { Question } from '@/data/questions';
 
-interface QuestionCardProps {
-  question: Question;
-  questionNumber: number;
-  totalQuestions: number;
-  onAnswer: (answerIndex: number) => void;
+type OptionLabel = 'A' | 'B' | 'C' | 'D';
+
+interface ExtendedQuestionCardProps extends QuestionCardProps {
   disabled?: boolean;
 }
 
-const optionLabels = ['A', 'B', 'C', 'D'];
+const optionLabels: readonly OptionLabel[] = ['A', 'B', 'C', 'D'] as const;
 
 export default function QuestionCard({
   question,
   questionNumber,
   totalQuestions,
   onAnswer,
-  disabled = false
-}: QuestionCardProps) {
+  disabled = false,
+  className = '',
+  'data-testid': testId
+}: ExtendedQuestionCardProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   // Safety check for undefined question
@@ -33,7 +34,7 @@ export default function QuestionCard({
     );
   }
 
-  const handleSelect = (index: number) => {
+  const handleSelect = (index: number): void => {
     if (disabled || selectedIndex !== null) return;
     
     setSelectedIndex(index);
@@ -49,8 +50,9 @@ export default function QuestionCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="w-full max-w-3xl mx-auto"
+      className={`w-full max-w-3xl mx-auto ${className}`}
       disabled={disabled}
+      data-testid={testId}
     >
       {/* Question Header */}
       <div className="mb-6">
@@ -70,8 +72,9 @@ export default function QuestionCard({
 
       {/* Options */}
       <div className="space-y-3" role="group" aria-label="Answer options">
-        {question.options.map((option, index) => {
-          const isSelected = selectedIndex === index;
+        {question.options.map((option: string, index: number) => {
+          const isSelected: boolean = selectedIndex === index;
+          const optionLabel: OptionLabel = optionLabels[index] as OptionLabel;
           
           return (
             <motion.button
@@ -90,7 +93,7 @@ export default function QuestionCard({
                 }
                 ${disabled ? 'cursor-not-allowed opacity-50' : ''}
               `}
-              aria-label={`Option ${optionLabels[index]}: ${option}${isSelected ? ' (selected)' : ''}`}
+              aria-label={`Option ${optionLabel}: ${option}${isSelected ? ' (selected)' : ''}`}
               aria-pressed={isSelected}
               type="button"
             >
@@ -105,7 +108,7 @@ export default function QuestionCard({
                     }
                   `}
                 >
-                  {optionLabels[index]}
+                  {optionLabel}
                 </div>
                 
                 {/* Option Text */}
