@@ -87,6 +87,8 @@ No staking. No long setup. Just **connect → play → earn**.
 * Earn **0.005 ETH bonus** for perfect score (10/10)
 * Earn up to **0.002 ETH speed bonus** for fast answers
 * **Max reward per game: 0.017 ETH**
+* **Bulk Reward Distribution**: Distribute rewards to up to 30 players simultaneously
+* **Bulk Answer Submission**: Submit answers to up to 20 questions in one transaction
 * Rewards distributed automatically via smart contract
 
 ### 🏆 **Leaderboard**
