@@ -67,4 +67,30 @@ contract SimpleTriviaGameTest is Test {
 
         vm.stopPrank();
     }
+
+    function test_RevertWhen_AddQuestionWithInvalidOptions() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](1);
+        options[0] = "Only one option";
+
+        vm.expectRevert(SimpleTriviaGame.InvalidOptions.selector);
+        game.addQuestion("Invalid question?", options, 0, 10 * 10**6);
+
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_AddQuestionWithInvalidCorrectOption() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](3);
+        options[0] = "Option A";
+        options[1] = "Option B";
+        options[2] = "Option C";
+
+        vm.expectRevert(SimpleTriviaGame.InvalidCorrectOption.selector);
+        game.addQuestion("Invalid question?", options, 5, 10 * 10**6);
+
+        vm.stopPrank();
+    }
 }
