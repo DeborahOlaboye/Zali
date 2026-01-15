@@ -287,13 +287,52 @@ PRIVATE_KEY=your_private_key_here
 
 # 🧪 **Testing Smart Contracts**
 
-Run Foundry tests:
+The project includes comprehensive test suites for all smart contracts using Foundry.
+
+## Test Suites
+
+### SimpleTriviaGame Tests
+- Constructor validation
+- Question management (add, retrieve)
+- Answer submission (correct/incorrect)
+- Reward distribution
+- Access control
+- Event emissions
+- Edge case handling
+
+### Faucet Tests
+- Token claiming functionality
+- One-time claim enforcement
+- Balance management
+- Withdrawal permissions
+- Error handling
+
+## Running Tests
 
 ```bash
 cd contracts
+
+# Run all tests
 forge test
-forge test -vvv # Verbose output
+
+# Run tests with verbose output
+forge test -vv
+
+# Run tests with gas reporting
+forge test --gas-report
+
+# Run specific test file
+forge test --match-path test/SimpleTriviaGame.t.sol
+
+# Run specific test function
+forge test --match-test test_SubmitCorrectAnswer
 ```
+
+## Test Coverage
+
+All 26 tests passing:
+- SimpleTriviaGame: 17 tests
+- Faucet: 9 tests
 
 ---
 
