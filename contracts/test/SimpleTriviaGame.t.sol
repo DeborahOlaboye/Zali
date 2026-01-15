@@ -31,4 +31,17 @@ contract SimpleTriviaGameTest is Test {
         mockUSDC.transfer(address(game), 10000 * 10**6); // 10,000 USDC
         vm.stopPrank();
     }
+
+    function test_ConstructorSetsTokenAddress() public view {
+        assertEq(address(game.usdcToken()), address(mockUSDC));
+    }
+
+    function test_ConstructorSetsOwner() public view {
+        assertEq(game.owner(), owner);
+    }
+
+    function test_RevertWhen_ConstructorCalledWithZeroAddress() public {
+        vm.expectRevert(SimpleTriviaGame.InvalidTokenAddress.selector);
+        new SimpleTriviaGame(address(0));
+    }
 }
