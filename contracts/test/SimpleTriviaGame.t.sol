@@ -193,4 +193,36 @@ contract SimpleTriviaGameTest is Test {
         vm.expectRevert(SimpleTriviaGame.InsufficientBalance.selector);
         game.withdrawTokens(contractBalance + 1);
     }
+
+    function test_EmitQuestionAddedEvent() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](2);
+        options[0] = "True";
+        options[1] = "False";
+
+        vm.expectEmit(true, false, false, true);
+        emit SimpleTriviaGame.QuestionAdded(1, "Is this a test?", 2 * 10**6);
+
+        game.addQuestion("Is this a test?", options, 0, 2 * 10**6);
+
+        vm.stopPrank();
+    }
+
+    function test_EmitAnswerSubmittedEventOnCorrectAnswer() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](2);
+        options[0] = "Correct";
+        options[1] = "Wrong";
+
+        game.addQuestion("Test?", options, 0, 3 * 10**6);
+        vm.stopPrank();
+
+        vm.expectEmit(true, false, false, true);
+        emit SimpleTriviaGame.AnswerSubmitted(player1, 1, true, 3 * 10**6);
+
+        vm.prank(player1);
+        game.submitAnswer(1, 0);
+    }
 }
