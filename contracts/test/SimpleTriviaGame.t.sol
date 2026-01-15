@@ -225,4 +225,42 @@ contract SimpleTriviaGameTest is Test {
         vm.prank(player1);
         game.submitAnswer(1, 0);
     }
+
+    function test_RevertWhen_NonOwnerAddsQuestion() public {
+        string[] memory options = new string[](2);
+        options[0] = "A";
+        options[1] = "B";
+
+        vm.prank(player1);
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", player1));
+        game.addQuestion("Unauthorized?", options, 0, 1 * 10**6);
+    }
+
+    function test_RevertWhen_NonOwnerWithdraws() public {
+        vm.prank(player1);
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", player1));
+        game.withdrawTokens(100 * 10**6);
+    }
+
+    function test_MultiplePlayersCanAnswerSameQuestion() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](2);
+        options[0] = "Correct";
+        options[1] = "Wrong";
+
+        game.addQuestion("Multiple players test?", options, 0, 5 * 10**6);
+        vm.stopPrank();
+
+        vm.prank(player1);
+        game.submitAnswer(1, 0);
+
+        vm.prank(player2);
+        game.submitAnswer(1, 0);
+
+        assertEq(game.userScores(player1), 1);
+        assertEq(game.userScores(player2), 1);
+        assertEq(mockUSDC.balanceOf(player1), 5 * 10**6);
+        assertEq(mockUSDC.balanceOf(player2), 5 * 10**6);
+    }
 }
