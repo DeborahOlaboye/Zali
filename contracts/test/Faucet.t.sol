@@ -41,22 +41,22 @@ contract FaucetTest is Test {
     function test_ClaimTokens() public {
         // User1 claims tokens
         vm.startPrank(user1);
-        
+
         // Check initial balance
         uint256 initialBalance = mockCUSD.balanceOf(user1);
-        
+
         // Claim tokens
         faucet.claim();
-        
+
         // Check final balance
         uint256 finalBalance = mockCUSD.balanceOf(user1);
-        assertEq(finalBalance - initialBalance, 10 * 10**18);
-        
+        assertEq(finalBalance - initialBalance, 10 * 10**6); // 10 USDC
+
         // Check that user1 is marked as claimed
         assertTrue(faucet.hasClaimed(user1));
-        
+
         // Try to claim again (should fail)
-        vm.expectRevert("Already claimed");
+        vm.expectRevert(Faucet.AlreadyClaimed.selector);
         faucet.claim();
     }
 
