@@ -1,0 +1,44 @@
+type Player @entity {
+  id: ID! # User address
+  address: Bytes!
+  totalScore: BigInt!
+  correctAnswers: BigInt!
+  totalAnswers: BigInt!
+  totalRewards: BigInt!
+  firstPlayedAt: BigInt!
+  lastPlayedAt: BigInt!
+  answers: [Answer!]! @derivedFrom(field: "player")
+}
+
+type Question @entity {
+  id: ID! # Question ID
+  questionId: BigInt!
+  questionText: String!
+  rewardAmount: BigInt!
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  answers: [Answer!]! @derivedFrom(field: "question")
+  totalAnswers: BigInt!
+  correctAnswers: BigInt!
+}
+
+type Answer @entity {
+  id: ID! # Transaction hash + log index
+  player: Player!
+  question: Question!
+  questionId: BigInt!
+  isCorrect: Boolean!
+  reward: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type GlobalStats @entity {
+  id: ID! # Always "global"
+  totalPlayers: BigInt!
+  totalAnswers: BigInt!
+  totalCorrectAnswers: BigInt!
+  totalRewardsDistributed: BigInt!
+  totalQuestions: BigInt!
+}
