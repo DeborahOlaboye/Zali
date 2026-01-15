@@ -102,9 +102,10 @@ contract FaucetTest is Test {
     
     function test_RevertWhen_InsufficientContractBalance() public {
         // Drain the faucet
-        vm.prank(owner);
+        vm.startPrank(owner);
         faucet.withdrawTokens(mockCUSD.balanceOf(address(faucet)));
-        
+        vm.stopPrank();
+
         // Try to claim
         vm.prank(user1);
         vm.expectRevert(Faucet.InsufficientContractBalance.selector);
