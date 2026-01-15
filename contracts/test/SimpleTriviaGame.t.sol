@@ -141,4 +141,34 @@ contract SimpleTriviaGameTest is Test {
         assertEq(finalBalance, initialBalance); // No reward
         assertEq(finalScore, initialScore); // No score increase
     }
+
+    function test_RevertWhen_SubmitAnswerToInactiveQuestion() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](2);
+        options[0] = "Yes";
+        options[1] = "No";
+
+        game.addQuestion("Test question?", options, 0, 1 * 10**6);
+        vm.stopPrank();
+
+        vm.prank(player1);
+        vm.expectRevert(SimpleTriviaGame.QuestionNotActive.selector);
+        game.submitAnswer(999, 0); // Non-existent question
+    }
+
+    function test_RevertWhen_SubmitAnswerWithInvalidOption() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](2);
+        options[0] = "Yes";
+        options[1] = "No";
+
+        game.addQuestion("Test question?", options, 0, 1 * 10**6);
+        vm.stopPrank();
+
+        vm.prank(player1);
+        vm.expectRevert(SimpleTriviaGame.InvalidOption.selector);
+        game.submitAnswer(1, 5); // Invalid option index
+    }
 }
