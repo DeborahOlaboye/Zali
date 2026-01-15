@@ -64,7 +64,7 @@ contract FaucetTest is Test {
         // User1 tries to withdraw (should fail)
         vm.startPrank(user1);
         vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user1));
-        faucet.withdrawTokens(10 * 10**18);
+        faucet.withdrawTokens(10 * 10**6); // 10 USDC
     }
 
     function test_WithdrawTokens() public {
