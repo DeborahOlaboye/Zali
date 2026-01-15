@@ -26,16 +26,16 @@ contract FaucetTest is Test {
         vm.startPrank(owner);
         mockCUSD = new MockERC20();
         faucet = new Faucet(address(mockCUSD));
-        
+
         // Transfer some tokens to the faucet
-        uint256 faucetBalance = 100 * 10**18;
+        uint256 faucetBalance = 100 * 10**6; // 100 USDC with 6 decimals
         mockCUSD.transfer(address(faucet), faucetBalance);
         vm.stopPrank();
     }
 
     function test_InitialState() public view {
-        assertEq(address(faucet.cUSDToken()), address(mockCUSD));
-        assertEq(faucet.CLAIM_AMOUNT(), 10 * 10**18);
+        assertEq(address(faucet.usdcToken()), address(mockCUSD));
+        assertEq(faucet.CLAIM_AMOUNT(), 10 * 10**6); // 10 USDC with 6 decimals
     }
 
     function test_ClaimTokens() public {
