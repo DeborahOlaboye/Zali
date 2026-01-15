@@ -117,4 +117,28 @@ contract SimpleTriviaGameTest is Test {
         assertEq(finalBalance - initialBalance, 5 * 10**6);
         assertEq(finalScore - initialScore, 1);
     }
+
+    function test_SubmitIncorrectAnswer() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](3);
+        options[0] = "Paris";
+        options[1] = "London";
+        options[2] = "Berlin";
+
+        game.addQuestion("What is the capital of France?", options, 0, 5 * 10**6);
+        vm.stopPrank();
+
+        uint256 initialBalance = mockUSDC.balanceOf(player1);
+        uint256 initialScore = game.userScores(player1);
+
+        vm.prank(player1);
+        game.submitAnswer(1, 1); // Wrong answer
+
+        uint256 finalBalance = mockUSDC.balanceOf(player1);
+        uint256 finalScore = game.userScores(player1);
+
+        assertEq(finalBalance, initialBalance); // No reward
+        assertEq(finalScore, initialScore); // No score increase
+    }
 }
