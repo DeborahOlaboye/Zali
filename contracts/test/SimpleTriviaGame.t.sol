@@ -171,4 +171,26 @@ contract SimpleTriviaGameTest is Test {
         vm.expectRevert(SimpleTriviaGame.InvalidOption.selector);
         game.submitAnswer(1, 5); // Invalid option index
     }
+
+    function test_WithdrawTokens() public {
+        uint256 initialOwnerBalance = mockUSDC.balanceOf(owner);
+        uint256 contractBalance = mockUSDC.balanceOf(address(game));
+
+        vm.prank(owner);
+        game.withdrawTokens(1000 * 10**6);
+
+        uint256 finalOwnerBalance = mockUSDC.balanceOf(owner);
+        uint256 finalContractBalance = mockUSDC.balanceOf(address(game));
+
+        assertEq(finalOwnerBalance - initialOwnerBalance, 1000 * 10**6);
+        assertEq(contractBalance - finalContractBalance, 1000 * 10**6);
+    }
+
+    function test_RevertWhen_WithdrawInsufficientBalance() public {
+        uint256 contractBalance = mockUSDC.balanceOf(address(game));
+
+        vm.prank(owner);
+        vm.expectRevert(SimpleTriviaGame.InsufficientBalance.selector);
+        game.withdrawTokens(contractBalance + 1);
+    }
 }
