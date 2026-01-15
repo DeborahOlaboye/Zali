@@ -44,4 +44,27 @@ contract SimpleTriviaGameTest is Test {
         vm.expectRevert(SimpleTriviaGame.InvalidTokenAddress.selector);
         new SimpleTriviaGame(address(0));
     }
+
+    function test_AddQuestion() public {
+        vm.startPrank(owner);
+
+        string[] memory options = new string[](4);
+        options[0] = "Option A";
+        options[1] = "Option B";
+        options[2] = "Option C";
+        options[3] = "Option D";
+
+        game.addQuestion("What is 2+2?", options, 2, 10 * 10**6);
+
+        (string memory questionText, string[] memory storedOptions, uint256 correctOption, uint256 rewardAmount, bool isActive) = game.getQuestion(1);
+
+        assertEq(questionText, "What is 2+2?");
+        assertEq(storedOptions.length, 4);
+        assertEq(storedOptions[0], "Option A");
+        assertEq(correctOption, 2);
+        assertEq(rewardAmount, 10 * 10**6);
+        assertTrue(isActive);
+
+        vm.stopPrank();
+    }
 }
