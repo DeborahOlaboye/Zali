@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import { SkipNavLink } from "@/components/SkipNavLink";
 import { Toaster } from "react-hot-toast";
 import { AutoFaucetProvider } from "@/contexts/AutoFaucetContext";
+import { Suspense } from "react";
+import PageTracker from "@/components/PageTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +27,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} antialiased bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen`}>
         <Providers>
+          <Suspense fallback={null}>
+            <PageTracker />
+          </Suspense>
           <AutoFaucetProvider>
             <SkipNavLink />
             <Navbar />
