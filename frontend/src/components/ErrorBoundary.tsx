@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -25,6 +26,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Track error in analytics
+    trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+      error: error.message,
+      componentStack: errorInfo.componentStack,
+      context: 'global_error_boundary',
+    });
+    
     this.props.onError?.(error, errorInfo);
   }
 
