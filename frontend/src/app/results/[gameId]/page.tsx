@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics';
 
 import { useAccount } from 'wagmi';
 
@@ -24,6 +25,17 @@ export default function ResultsPage() {
   const percentage = Math.round((score / total) * 100);
   const isPerfect = score === total;
   const isWinner = percentage >= 60;
+
+  useEffect(() => {
+    trackEvent(ANALYTICS_EVENTS.GAME_COMPLETED, {
+      gameId: gameId,
+      score: score,
+      totalQuestions: total,
+      accuracy: percentage,
+      rank: rank > 0 ? rank : undefined,
+      reward: rewards,
+    });
+  }, [gameId, score, total, percentage, rank, rewards]);
 
   useEffect(() => {
     if (isWinner) {
