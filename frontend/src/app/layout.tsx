@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { AutoFaucetProvider } from "@/contexts/AutoFaucetContext";
 import { Suspense } from "react";
 import PageTracker from "@/components/PageTracker";
+import WalletTracker from "@/components/WalletTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         <Providers>
           <Suspense fallback={null}>
             <PageTracker />
+            <WalletTracker />
           </Suspense>
           <AutoFaucetProvider>
             <SkipNavLink />
