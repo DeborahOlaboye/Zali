@@ -133,6 +133,9 @@ export const createGameSlice: StateCreator<
       'game/submitAnswer'
     );
 
+    // Check for achievements after answer
+    (get() as any).checkAchievements();
+
     return isCorrect;
   },
 
