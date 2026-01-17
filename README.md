@@ -239,7 +239,7 @@ function withdrawTokens(uint256 amount) external onlyOwner;
 ## 1️⃣ Clone the Repo
 
 ```bash
-git clone https://github.com/yourname/zali.git
+git clone https://github.com/AdekunleBamz/Zali.git
 cd Zali
 ```
 
