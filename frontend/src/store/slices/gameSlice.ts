@@ -39,7 +39,7 @@ export interface GameState {
   setCurrentQuestion: (question: Question | null) => void;
   startGame: () => void;
   endGame: () => void;
-  submitAnswer: (answer: string) => Promise<boolean>;
+  submitAnswer: (answer: string, timeTaken?: number) => Promise<boolean>;
   loadGameSession: (sessionId: string) => Promise<void>;
   updatePlayerStats: (stats: Partial<PlayerStats>) => void;
   resetGame: () => void;
@@ -104,7 +104,7 @@ export const createGameSlice: StateCreator<
   endGame: () => 
     set({ isGameActive: false }, false, 'game/endGame'),
 
-  submitAnswer: async (answer) => {
+  submitAnswer: async (answer, timeTaken) => {
     const { currentQuestion, playerStats } = get();
     if (!currentQuestion) return false;
 
@@ -146,6 +146,9 @@ export const createGameSlice: StateCreator<
     );
 
     // Check for achievements after answer
+    if (isCorrect && timeTaken && timeTaken < 5000 && !(get() as any).achievements.find((a: any) => a.id === 'speed-demon')?.isUnlocked) {
+      (get() as any).unlockAchievement('speed-demon');
+    }
     (get() as any).checkAchievements();
 
     return isCorrect;
