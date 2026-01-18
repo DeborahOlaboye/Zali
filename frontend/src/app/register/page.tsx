@@ -3,81 +3,23 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
-import toast from 'react-hot-toast';
-import { registrationSchema, RegistrationFormData } from '@/utils/validations/auth.schema';
-import { useSanitizedForm } from '@/hooks/useSanitizedForm';
 import { usePlayerRegistration } from '@/hooks/useContract';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
-  
-  const { 
-    isRegistered, 
-    registerUsername, 
-    registerState,
-    refetchPlayerInfo,
-  } = usePlayerRegistration();
-  
-  const { isLoading: registerIsLoading, isSuccess: registerIsSuccess, error: registerError, isError: registerIsError } = registerState;
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty, isValid, isSubmitting },
-    watch,
-    clearErrors,
-  } = useSanitizedForm(registrationSchema, {
-    mode: 'onChange',
-    defaultValues: {
-      username: '',
-    },
-  });
-  
-  const watchedUsername = watch('username');
+  const { isRegistered } = usePlayerRegistration();
 
-  // Redirect if already registered
+  // For SimpleTriviaGame, no registration is needed - auto redirect
   useEffect(() => {
-    if (isRegistered) {
-      router.push('/play');
-    }
-  }, [isRegistered, router]);
-
-  // Redirect on successful registration
-  useEffect(() => {
-    if (registerIsSuccess) {
-      toast.success('Registration successful! 🎉');
-      // Refetch player info to update isRegistered status
-      refetchPlayerInfo();
+    if (isRegistered && isConnected) {
       const timer = setTimeout(() => {
         router.push('/play');
-      }, 2000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [registerIsSuccess, router, refetchPlayerInfo]);
-
-  // Show error toast
-  useEffect(() => {
-    if (registerError) {
-      toast.error(registerError.message || 'Registration failed. Please try again.');
-    }
-  }, [registerError]);
-
-  const onSubmit = async (data: RegistrationFormData) => {
-    try {
-      const loadingToast = toast.loading('Registering username... Please confirm the transaction', {
-        duration: 60000,
-      });
-      
-      await registerUsername(data.username);
-      
-      toast.dismiss(loadingToast);
-    } catch (err) {
-      console.error('Registration error:', err);
-      toast.dismiss();
-      toast.error('Failed to register. Please try again.');
-    }
-  };
+  }, [isRegistered, isConnected, router]);
 
   if (!isConnected) {
     return (
@@ -87,17 +29,38 @@ export default function RegisterPage() {
             Connect Your Wallet
           </h1>
           <p className="text-center text-gray-600">
-            Please connect your wallet to register
+            Please connect your wallet to continue
           </p>
         </div>
       </div>
     );
   }
 
-  if (isRegistered) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+        <div className="mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Ready to Play!</h1>
+          <p className="text-gray-600 mb-4">
+            No registration required for the current game version.
+          </p>
+          <p className="text-sm text-gray-500">
+            🚧 Username registration coming with TriviaGameV2 upgrade
+          </p>
+        </div>
+
+        <div className="animate-pulse bg-blue-100 h-12 rounded-lg flex items-center justify-center">
+          <span className="text-blue-600 font-medium">Redirecting to game...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
           <div className="text-center">
             <div className="text-6xl mb-4">✅</div>
             <h1 className="text-3xl font-bold mb-4 text-gray-800">
