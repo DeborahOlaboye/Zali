@@ -1,529 +1,572 @@
-# Error Boundaries Documentation
+# Error Boundary System
+
+This document describes the comprehensive error boundary system implemented in the Zali application.
 
 ## Overview
 
-Error boundaries are React components that catch JavaScript errors anywhere in the child component tree, log those errors, and display a fallback UI instead of crashing the entire application. This document provides comprehensive guidance on implementing and using error boundaries in the Zali application.
+The error boundary system provides:
 
-## Table of Contents
+- **Multiple specialized error boundaries** for different contexts
+- **Automatic error recovery** with configurable strategies
+- **Comprehensive error logging** and analysis
+- **User-friendly error UI** with recovery options
+- **Global error handling** for unhandled errors
 
-1. [Types of Error Boundaries](#types-of-error-boundaries)
-2. [Implementation Guide](#implementation-guide)
-3. [Usage Examples](#usage-examples)
-4. [Error Handling Strategy](#error-handling-strategy)
-5. [Testing Error Boundaries](#testing-error-boundaries)
-6. [Best Practices](#best-practices)
-7. [API Reference](#api-reference)
+## Error Boundary Components
 
-## Types of Error Boundaries
+### ErrorBoundary (Base Component)
 
-### 1. ErrorBoundary (Base Component)
-
-The foundational error boundary component with support for:
-- Custom fallback UI
-- Error logging and monitoring
-- Error severity analysis
-- Auto-recovery capabilities
-- Development error details
-
-**When to use:**
-- Wrapping major sections of the application
-- Protecting feature-specific components
-- Implementing custom error handling logic
-
-### 2. ContractErrorBoundary
-
-Specialized error boundary for smart contract interactions with:
-- Contract-specific error parsing
-- Network switching support
-- Transaction error handling
-- Wallet error management
-
-**When to use:**
-- Wrapping components that interact with smart contracts
-- Transaction forms and contract calls
-- Wallet-dependent features
-
-### 3. WalletErrorBoundary
-
-Dedicated error boundary for wallet-related operations with:
-- Wallet connection error handling
-- Auto-recovery suggestions
-- Enhanced error UI for wallet issues
-
-**When to use:**
-- Wrapping wallet provider components
-- Authentication components
-- Wallet selector components
-
-### 4. AsyncErrorBoundary
-
-Specialized for asynchronous operations with:
-- Network request error handling
-- Async operation tracking
-- Loading state management
-- Retry mechanisms
-
-**When to use:**
-- API call error handling
-- Data fetching operations
-- Async form submissions
-
-## Implementation Guide
-
-### Basic Setup
-
-Each error boundary follows the same basic pattern:
+The main error boundary component with comprehensive error handling features.
 
 ```tsx
-<ErrorBoundary 
-  name="ComponentName"
+import { ErrorBoundary } from '@/components/errorBoundaries';
+
+<ErrorBoundary
+  name="MyComponent"
   level="component"
-  onError={(error, errorInfo) => {
-    // Handle error
-  }}
+  enableAutoRecovery={true}
+  showDetails={false}
+  onError={(error, errorInfo) => console.log('Error caught:', error)}
 >
-  {/* Your component content */}
+  <MyComponent />
 </ErrorBoundary>
 ```
 
-### With Custom Fallback
+**Props:**
+- `name`: Component identifier for logging
+- `level`: Error level ('page' | 'section' | 'component')
+- `enableAutoRecovery`: Enable automatic recovery attempts
+- `showDetails`: Show error details in development
+- `fallback`: Custom error UI component
+- `onError`: Error callback function
+
+### RouteErrorBoundary
+
+Full-screen error boundary for page-level errors.
 
 ```tsx
-<ErrorBoundary
-  name="MyComponent"
-  fallback={(error, errorInfo, reset) => (
-    <div className="error-container">
-      <h2>Custom Error Occurred</h2>
-      <p>{error.message}</p>
-      <button onClick={reset}>Retry</button>
-    </div>
-  )}
->
-  {/* Your component content */}
-</ErrorBoundary>
+import { RouteErrorBoundary } from '@/components/errorBoundaries';
+
+<RouteErrorBoundary routeName="Dashboard">
+  <DashboardPage />
+</RouteErrorBoundary>
 ```
 
-### With Error Logging
+**Features:**
+- Full-screen error UI
+- Navigation options (back, home, refresh, retry)
+- Route-specific error context
+- Development mode error details
+
+### FormErrorBoundary
+
+Specialized error boundary for form components.
 
 ```tsx
-<ErrorBoundary
-  name="MyComponent"
-  level="page"
-  enableLogging={true}
-  onError={(error, errorInfo) => {
-    // Send to error tracking service
-    trackError({
-      error,
-      errorInfo,
-      component: 'MyComponent'
-    });
-  }}
+import { FormErrorBoundary } from '@/components/errorBoundaries';
+
+<FormErrorBoundary 
+  formName="Registration"
+  onReset={() => form.reset()}
 >
-  {/* Your component content */}
-</ErrorBoundary>
+  <RegistrationForm />
+</FormErrorBoundary>
+```
+
+**Features:**
+- Form-specific error messaging
+- Form reset functionality
+- Compact error UI
+- Error message formatting
+
+### QueryErrorBoundary
+
+Error boundary for React Query data fetching errors.
+
+```tsx
+import { QueryErrorBoundary } from '@/components/errorBoundaries';
+
+<QueryErrorBoundary>
+  <DataComponent />
+</QueryErrorBoundary>
+```
+
+**Features:**
+- Integration with React Query error reset
+- Data loading error UI
+- Automatic retry functionality
+- Connection error handling
+
+### SuspenseErrorBoundary
+
+Combines React Suspense with error boundary functionality.
+
+```tsx
+import { SuspenseErrorBoundary } from '@/components/errorBoundaries';
+
+<SuspenseErrorBoundary 
+  fallback={<LoadingSpinner />}
+  name="LazyComponent"
+>
+  <LazyLoadedComponent />
+</SuspenseErrorBoundary>
+```
+
+**Features:**
+- Loading state management
+- Error state handling
+- Lazy component support
+- Async operation error handling
+
+## Error Recovery System
+
+### Automatic Recovery
+
+The system includes automatic error recovery with configurable strategies:
+
+```tsx
+import { useErrorRecovery } from '@/components/errorBoundaries';
+
+function MyComponent() {
+  const { attemptRecovery, addRecoveryStrategy } = useErrorRecovery();
+
+  // Add custom recovery strategy
+  addRecoveryStrategy({
+    name: 'CustomRecovery',
+    canRecover: (error) => error.message.includes('custom'),
+    recover: async (error) => {
+      // Custom recovery logic
+      return true; // Return true if recovered
+    },
+    maxAttempts: 3,
+    delay: 1000,
+  });
+}
+```
+
+### Default Recovery Strategies
+
+1. **NetworkRetry**: Retries network-related errors
+2. **LocalStorageRecovery**: Clears localStorage on quota errors
+3. **ComponentRefresh**: Reloads page for chunk loading errors
+
+### Recovery Manager
+
+```tsx
+import { globalRecoveryManager } from '@/components/errorBoundaries';
+
+// Add global recovery strategy
+globalRecoveryManager.addStrategy({
+  name: 'DatabaseRecovery',
+  canRecover: (error) => error.message.includes('database'),
+  recover: async () => {
+    // Attempt database reconnection
+    return await reconnectDatabase();
+  },
+});
+```
+
+## Global Error Handling
+
+### useGlobalErrorHandler Hook
+
+Handles unhandled errors and promise rejections globally:
+
+```tsx
+import { useGlobalErrorHandler } from '@/components/errorBoundaries';
+
+function App() {
+  useGlobalErrorHandler({
+    enableConsoleLogging: true,
+    enableRemoteLogging: true,
+    onError: (error, context) => {
+      // Custom global error handling
+      console.error(`Global error in ${context}:`, error);
+    },
+  });
+
+  return <AppContent />;
+}
+```
+
+**Features:**
+- Catches unhandled promise rejections
+- Handles global JavaScript errors
+- Configurable logging options
+- Custom error callbacks
+
+## Error Analysis and Logging
+
+### Error Analysis
+
+```tsx
+import { analyzeError, getErrorMessage } from '@/components/errorBoundaries';
+
+const error = new Error('Network timeout');
+const analysis = analyzeError(error);
+
+console.log(analysis.severity); // 'warning' | 'critical' | 'info'
+console.log(analysis.category); // 'network' | 'validation' | 'system'
+console.log(getErrorMessage(error)); // User-friendly message
+```
+
+### Error Logging
+
+```tsx
+import { errorLogger } from '@/components/errorBoundaries';
+
+errorLogger.logError(error, {
+  component: 'UserProfile',
+  level: 'component',
+  context: { userId: '123' },
+}, 'warning');
 ```
 
 ## Usage Examples
 
-### Example 1: Page-level Error Boundary
+### Page-Level Error Handling
 
 ```tsx
-// src/app/play/page.tsx
-import ErrorBoundary from '@/components/ErrorBoundary';
-import GameComponent from '@/components/GameComponent';
+// app/dashboard/page.tsx
+import { RouteErrorBoundary } from '@/components/errorBoundaries';
 
-export default function PlayPage() {
+export default function DashboardPage() {
   return (
-    <ErrorBoundary
-      name="PlayPage"
-      level="page"
-      enableLogging={true}
-    >
-      <GameComponent />
-    </ErrorBoundary>
+    <RouteErrorBoundary routeName="Dashboard">
+      <DashboardContent />
+    </RouteErrorBoundary>
   );
 }
 ```
 
-### Example 2: Section-level Error Boundary
+### Form Error Handling
 
 ```tsx
-// src/components/LeaderboardSection.tsx
-import ErrorBoundary from '@/components/ErrorBoundary';
-import Leaderboard from '@/components/Leaderboard';
+// components/RegistrationForm.tsx
+import { FormErrorBoundary } from '@/components/errorBoundaries';
 
-export function LeaderboardSection() {
+export function RegistrationForm() {
+  const form = useForm();
+
   return (
-    <ErrorBoundary
-      name="LeaderboardSection"
-      level="section"
-      fallback={(error, errorInfo, reset) => (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
-          <p>Failed to load leaderboard</p>
-          <button onClick={reset}>Try Again</button>
+    <FormErrorBoundary 
+      formName="Registration"
+      onReset={() => form.reset()}
+    >
+      <form onSubmit={form.handleSubmit}>
+        {/* Form fields */}
+      </form>
+    </FormErrorBoundary>
+  );
+}
+```
+
+### Data Fetching Error Handling
+
+```tsx
+// components/UserList.tsx
+import { QueryErrorBoundary } from '@/components/errorBoundaries';
+
+export function UserList() {
+  return (
+    <QueryErrorBoundary>
+      <UserListContent />
+    </QueryErrorBoundary>
+  );
+}
+
+function UserListContent() {
+  const { data, error } = useQuery('users', fetchUsers);
+  
+  if (error) throw error; // Will be caught by QueryErrorBoundary
+  
+  return <div>{/* Render users */}</div>;
+}
+```
+
+### Lazy Component Error Handling
+
+```tsx
+// components/LazyDashboard.tsx
+import { SuspenseErrorBoundary } from '@/components/errorBoundaries';
+import { lazy } from 'react';
+
+const LazyDashboard = lazy(() => import('./Dashboard'));
+
+export function LazyDashboardWrapper() {
+  return (
+    <SuspenseErrorBoundary 
+      fallback={<DashboardSkeleton />}
+      name="LazyDashboard"
+    >
+      <LazyDashboard />
+    </SuspenseErrorBoundary>
+  );
+}
+```
+
+### Nested Error Boundaries
+
+```tsx
+// Complex component with multiple error boundaries
+export function ComplexPage() {
+  return (
+    <RouteErrorBoundary routeName="ComplexPage">
+      <Header />
+      
+      <QueryErrorBoundary>
+        <DataSection />
+      </QueryErrorBoundary>
+      
+      <FormErrorBoundary formName="Settings">
+        <SettingsForm />
+      </FormErrorBoundary>
+      
+      <SuspenseErrorBoundary>
+        <LazyWidget />
+      </SuspenseErrorBoundary>
+    </RouteErrorBoundary>
+  );
+}
+```
+
+## Error UI Customization
+
+### Custom Error Fallback
+
+```tsx
+const CustomErrorFallback = (error: Error, errorInfo: ErrorInfo, reset: () => void) => (
+  <div className="custom-error-container">
+    <h2>Oops! Something went wrong</h2>
+    <details>
+      <summary>Error details</summary>
+      <pre>{error.message}</pre>
+    </details>
+    <button onClick={reset}>Try again</button>
+  </div>
+);
+
+<ErrorBoundary fallback={CustomErrorFallback}>
+  <MyComponent />
+</ErrorBoundary>
+```
+
+### Themed Error UI
+
+```tsx
+const ThemedErrorBoundary = ({ children, theme = 'light' }) => (
+  <ErrorBoundary
+    fallback={(error, errorInfo, reset) => (
+      <div className={`error-boundary ${theme}`}>
+        <div className="error-content">
+          <h3>Something went wrong</h3>
+          <p>{error.message}</p>
+          <button onClick={reset} className={`btn-${theme}`}>
+            Retry
+          </button>
         </div>
-      )}
-    >
-      <Leaderboard />
-    </ErrorBoundary>
-  );
-}
+      </div>
+    )}
+  >
+    {children}
+  </ErrorBoundary>
+);
 ```
 
-### Example 3: Contract Interaction Error Boundary
+## Best Practices
+
+### 1. Use Appropriate Error Boundaries
+
+- **RouteErrorBoundary**: For page-level components
+- **FormErrorBoundary**: For form components
+- **QueryErrorBoundary**: For data fetching components
+- **SuspenseErrorBoundary**: For lazy-loaded components
+- **ErrorBoundary**: For general component error handling
+
+### 2. Provide Meaningful Error Context
 
 ```tsx
-// src/components/PlayForm.tsx
-import ContractErrorBoundary from '@/components/ContractErrorBoundary';
-import GameForm from '@/components/GameForm';
+// Good - Specific error context
+<ErrorBoundary name="UserProfile" level="component">
+  <UserProfile userId={userId} />
+</ErrorBoundary>
 
-export function PlayForm() {
-  return (
-    <ContractErrorBoundary
-      context={{ operation: 'playGame' }}
-    >
-      <GameForm />
-    </ContractErrorBoundary>
-  );
-}
+// Bad - Generic error context
+<ErrorBoundary>
+  <UserProfile userId={userId} />
+</ErrorBoundary>
 ```
 
-### Example 4: Async Operation Error Boundary
+### 3. Enable Auto-Recovery for Recoverable Errors
 
 ```tsx
-// src/components/UserProfile.tsx
-import AsyncErrorBoundary from '@/components/AsyncErrorBoundary';
-import ProfileContent from '@/components/ProfileContent';
+// Enable auto-recovery for network components
+<ErrorBoundary enableAutoRecovery={true}>
+  <NetworkDependentComponent />
+</ErrorBoundary>
 
-export function UserProfile() {
-  return (
-    <AsyncErrorBoundary
-      name="UserProfileFetch"
-    >
-      <ProfileContent />
-    </AsyncErrorBoundary>
-  );
-}
+// Disable auto-recovery for critical components
+<ErrorBoundary enableAutoRecovery={false}>
+  <PaymentComponent />
+</ErrorBoundary>
 ```
 
-## Error Handling Strategy
+### 4. Implement Custom Recovery Strategies
 
-### Error Severity Levels
+```tsx
+// Add domain-specific recovery strategies
+const { addRecoveryStrategy } = useErrorRecovery();
 
-Errors are classified into three severity levels:
-
-1. **Critical** - Application or feature cannot continue
-   - Contract errors
-   - Wallet disconnection
-   - Type errors
-   - Reference errors
-
-2. **Warning** - Operation failed but can be retried
-   - Network errors
-   - Timeouts
-   - Contract reverts
-
-3. **Info** - Expected user actions
-   - Transaction rejection
-   - Permission denial
-   - User cancellation
-
-### Error Recovery Flow
-
-```
-Error Occurs
-    ↓
-Error Boundary Catches It
-    ↓
-Logger Records Error (with severity)
-    ↓
-Error Analysis (categorization)
-    ↓
-Display Appropriate UI
-    ↓
-User Can Retry / Navigate Away
+addRecoveryStrategy({
+  name: 'AuthRecovery',
+  canRecover: (error) => error.message.includes('unauthorized'),
+  recover: async () => {
+    await refreshAuthToken();
+    return true;
+  },
+});
 ```
 
-### Error Categories
+### 5. Log Errors Appropriately
 
-The system automatically categorizes errors:
-
-- **wallet** - Wallet connection issues
-- **network** - Network and timeout errors
-- **contract** - Smart contract failures
-- **permission** - Permission/denial errors
-- **timeout** - Request timeout
-- **balance** - Insufficient funds
-- **type** - Type errors
-- **reference** - Reference errors
-- **syntax** - Syntax errors
-- **unknown** - Unclassified errors
+```tsx
+<ErrorBoundary
+  onError={(error, errorInfo) => {
+    // Log to external service in production
+    if (process.env.NODE_ENV === 'production') {
+      logToExternalService(error, errorInfo);
+    }
+  }}
+>
+  <CriticalComponent />
+</ErrorBoundary>
+```
 
 ## Testing Error Boundaries
 
 ### Unit Tests
 
 ```tsx
-describe('ErrorBoundary', () => {
-  it('should render fallback on error', () => {
-    const ErrorComponent = () => {
-      throw new Error('Test error');
-    };
+import { render, screen } from '@testing-library/react';
+import { ErrorBoundary } from '@/components/errorBoundaries';
 
-    render(
-      <ErrorBoundary>
-        <ErrorComponent />
-      </ErrorBoundary>
-    );
+const ThrowError = () => {
+  throw new Error('Test error');
+};
 
-    expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
-  });
+test('should catch and display error', () => {
+  render(
+    <ErrorBoundary>
+      <ThrowError />
+    </ErrorBoundary>
+  );
 
-  it('should call onError callback', () => {
-    const onError = jest.fn();
-    const ErrorComponent = () => {
-      throw new Error('Test error');
-    };
-
-    render(
-      <ErrorBoundary onError={onError}>
-        <ErrorComponent />
-      </ErrorBoundary>
-    );
-
-    expect(onError).toHaveBeenCalled();
-  });
+  expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
 });
 ```
 
 ### Integration Tests
 
 ```tsx
-describe('Error Boundary Integration', () => {
-  it('should recover from async errors', async () => {
-    const { rerender } = render(
-      <ErrorBoundary>
-        <AsyncComponent />
-      </ErrorBoundary>
-    );
+test('should recover from network errors', async () => {
+  const { rerender } = render(
+    <ErrorBoundary enableAutoRecovery={true}>
+      <NetworkComponent shouldFail={true} />
+    </ErrorBoundary>
+  );
 
-    expect(screen.getByText(/error/i)).toBeInTheDocument();
-
-    // Rerender with fixed component
-    rerender(
-      <ErrorBoundary>
-        <SafeComponent />
-      </ErrorBoundary>
-    );
-
-    expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
+  // Wait for auto-recovery
+  await waitFor(() => {
+    expect(screen.getByText('Recovered')).toBeInTheDocument();
   });
 });
 ```
 
-## Best Practices
+## Performance Considerations
 
-### 1. Granular Error Boundaries
-
-Create error boundaries at multiple levels:
+### 1. Minimize Error Boundary Nesting
 
 ```tsx
-<ErrorBoundary level="page">
-  <PageContent>
-    <ErrorBoundary level="section">
-      <Section1 />
+// Good - Strategic placement
+<RouteErrorBoundary>
+  <Page>
+    <QueryErrorBoundary>
+      <DataSection />
+    </QueryErrorBoundary>
+  </Page>
+</RouteErrorBoundary>
+
+// Avoid - Excessive nesting
+<ErrorBoundary>
+  <ErrorBoundary>
+    <ErrorBoundary>
+      <Component />
     </ErrorBoundary>
-    <ErrorBoundary level="section">
-      <Section2 />
-    </ErrorBoundary>
-  </PageContent>
+  </ErrorBoundary>
 </ErrorBoundary>
 ```
 
-**Benefits:**
-- Errors in one section don't crash the entire page
-- Better error isolation and recovery
-- More granular error tracking
-
-### 2. Custom Error Messages
-
-Always provide user-friendly error messages:
+### 2. Use Lazy Loading for Error UI
 
 ```tsx
+const LazyErrorFallback = lazy(() => import('./ErrorFallback'));
+
 <ErrorBoundary
-  fallback={(error) => (
-    <div>
-      <h2>Unable to load content</h2>
-      <p>Please refresh the page or try again later</p>
-    </div>
+  fallback={(error, errorInfo, reset) => (
+    <Suspense fallback={<div>Loading error UI...</div>}>
+      <LazyErrorFallback error={error} onReset={reset} />
+    </Suspense>
   )}
 >
-  {children}
+  <Component />
 </ErrorBoundary>
 ```
 
-### 3. Error Context
-
-Include component context in error logs:
+### 3. Debounce Error Logging
 
 ```tsx
-<ErrorBoundary
-  name="PaymentForm"
-  onError={(error, errorInfo) => {
-    logError({
-      component: 'PaymentForm',
-      operation: 'processPayment',
-      error,
-      timestamp: new Date(),
-    });
-  }}
->
-  {children}
+const debouncedLogger = debounce((error) => {
+  errorLogger.logError(error);
+}, 1000);
+
+<ErrorBoundary onError={debouncedLogger}>
+  <Component />
 </ErrorBoundary>
-```
-
-### 4. Recovery Mechanisms
-
-Implement auto-recovery when appropriate:
-
-```tsx
-<ErrorBoundary
-  level="component"
-  onError={(error) => {
-    // Auto-refresh data after error
-    setTimeout(() => {
-      refetchData();
-    }, 3000);
-  }}
->
-  {children}
-</ErrorBoundary>
-```
-
-### 5. Error Logging
-
-Always enable logging in production:
-
-```tsx
-<ErrorBoundary
-  enableLogging={true}
-  onError={(error, errorInfo) => {
-    // Send to error tracking service
-    if (process.env.NODE_ENV === 'production') {
-      sentryClient.captureException(error, {
-        contexts: { errorInfo }
-      });
-    }
-  }}
->
-  {children}
-</ErrorBoundary>
-```
-
-## API Reference
-
-### ErrorBoundary Props
-
-```typescript
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: (error: Error, errorInfo: ErrorInfo, reset: () => void) => ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-  level?: 'page' | 'section' | 'component';
-  name?: string;
-  enableLogging?: boolean;
-  showDetails?: boolean;
-}
-```
-
-### ContractErrorBoundary Props
-
-```typescript
-interface ContractErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: (error: ContractError, resetError: () => void) => ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-  context?: Record<string, any>;
-}
-```
-
-### AsyncErrorBoundary Props
-
-```typescript
-interface AsyncErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: (error: Error, reset: () => void) => ReactNode;
-  onError?: (error: Error) => void;
-  name?: string;
-}
-```
-
-### Error Logger API
-
-```typescript
-class ErrorLogger {
-  log(entry: ErrorLogEntry): void;
-  logError(error: Error, context?: Record<string, any>, severity?: ErrorSeverity): void;
-  getLogs(): ErrorLogEntry[];
-  getLogsBySeverity(severity: ErrorSeverity): ErrorLogEntry[];
-  clearLogs(): void;
-}
-```
-
-### Error Analyzer API
-
-```typescript
-function analyzeError(error: Error | null, errorInfo?: ErrorInfo): ErrorAnalysis;
-function getErrorCategory(error: Error): string;
-function isRecoverableError(error: Error): boolean;
-function getErrorMessage(error: Error | null): string;
 ```
 
 ## Troubleshooting
 
-### Error Boundary Not Catching Errors
+### Common Issues
 
-Error boundaries **cannot** catch errors from:
-- Event handlers (use try-catch instead)
-- Asynchronous code (use AsyncErrorBoundary)
-- Server-side rendering
-- The error boundary itself
+1. **Error boundaries not catching errors**
+   - Ensure errors are thrown during render, not in event handlers
+   - Use try-catch for event handler errors
 
-### Multiple Error Boundaries Triggering
+2. **Auto-recovery not working**
+   - Check if error is marked as recoverable
+   - Verify recovery strategy conditions
 
-If multiple boundaries are catching the same error:
-- Ensure boundaries are properly nested
-- Use more specific error handling at lower levels
-- Check component hierarchy
+3. **Multiple error boundaries triggering**
+   - Review error boundary hierarchy
+   - Ensure proper error propagation
 
-### Memory Leaks in Error Logging
+### Debug Mode
 
-If using error logging:
-- Ensure cleanup in `componentWillUnmount()`
-- Limit log storage to prevent memory issues
-- Use log rotation or clearing strategies
+Enable detailed error logging:
 
-## Migration Guide
+```tsx
+<ErrorBoundary
+  showDetails={process.env.NODE_ENV === 'development'}
+  enableLogging={true}
+>
+  <Component />
+</ErrorBoundary>
+```
 
-To migrate existing error handling to the new system:
+## Future Enhancements
 
-1. **Identify error-prone areas** in your components
-2. **Choose appropriate error boundary** (page, section, or component level)
-3. **Wrap components** with the selected error boundary
-4. **Add custom fallback UI** if needed
-5. **Test error scenarios** to ensure proper handling
-6. **Add error logging** for monitoring
-
-## Support & Feedback
-
-For questions about error boundaries or to report issues:
-
-1. Check existing documentation
-2. Review component tests for usage examples
-3. Create an issue with error boundary label
-4. Submit PR with improvements
-
----
-
-**Last Updated:** December 2025
-**Version:** 1.0
+- **Error analytics dashboard** for monitoring error patterns
+- **Smart error recovery** with machine learning
+- **User feedback integration** for error reporting
+- **Performance impact monitoring** for error boundaries
+- **A/B testing** for error UI effectiveness

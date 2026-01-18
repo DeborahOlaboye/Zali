@@ -1,23 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { TimerProps } from '@/types/components';
 
-interface TimerProps {
-  duration: number; // Duration in seconds
-  onTimeUp: () => void;
+interface ExtendedTimerProps extends TimerProps {
   isPaused?: boolean;
   autoStart?: boolean;
 }
+
+type TimerColor = 'bg-green-500' | 'bg-yellow-500' | 'bg-red-500';
+type TextColor = 'text-green-600' | 'text-yellow-600' | 'text-red-600';
 
 export default function Timer({
   duration,
   onTimeUp,
   isPaused = false,
-  autoStart = true
-}: TimerProps) {
-  const [timeLeft, setTimeLeft] = useState(duration);
-  const [isActive, setIsActive] = useState(autoStart);
+  autoStart = true,
+  className = '',
+  'data-testid': testId
+}: ExtendedTimerProps) {
+  const [timeLeft, setTimeLeft] = useState<number>(duration);
+  const [isActive, setIsActive] = useState<boolean>(autoStart);
 
   useEffect(() => {
     setTimeLeft(duration);
@@ -28,7 +32,7 @@ export default function Timer({
     if (!isActive || isPaused) return;
 
     const interval = setInterval(() => {
-      setTimeLeft((prev) => {
+      setTimeLeft((prev: number) => {
         if (prev <= 1) {
           clearInterval(interval);
           onTimeUp();
@@ -41,28 +45,28 @@ export default function Timer({
     return () => clearInterval(interval);
   }, [isActive, isPaused, onTimeUp]);
 
-  const percentage = (timeLeft / duration) * 100;
+  const percentage: number = (timeLeft / duration) * 100;
   
-  const getColor = () => {
+  const getColor = useCallback((): TimerColor => {
     if (percentage > 50) return 'bg-green-500';
     if (percentage > 25) return 'bg-yellow-500';
     return 'bg-red-500';
-  };
+  }, [percentage]);
 
-  const getTextColor = () => {
+  const getTextColor = useCallback((): TextColor => {
     if (percentage > 50) return 'text-green-600';
     if (percentage > 25) return 'text-yellow-600';
     return 'text-red-600';
-  };
+  }, [percentage]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+  const formatTime = useCallback((seconds: number): string => {
+    const mins: number = Math.floor(seconds / 60);
+    const secs: number = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className={`w-full max-w-3xl mx-auto ${className}`} data-testid={testId}>
       <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
         {/* Timer Display */}
         <div className="flex items-center justify-between mb-3">

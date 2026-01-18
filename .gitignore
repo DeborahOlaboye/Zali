@@ -2,6 +2,7 @@
 # Dependencies
 node_modules/
 lib/
+!frontend/src/lib/
 
 # Build outputs
 .next/
