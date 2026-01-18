@@ -3,6 +3,23 @@ import { Achievement, AchievementState } from '@/types/achievement';
 
 const calculateStreak = (dates: string[]): number => {
   if (dates.length === 0) return 0;
+  const sortedDates = [...dates].sort();
+  let streak = 1;
+  for (let i = sortedDates.length - 2; i >= 0; i--) {
+    const prev = new Date(sortedDates[i]);
+    const curr = new Date(sortedDates[i + 1]);
+    const diff = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+    if (diff === 1) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+};
+
+const calculateStreak = (dates: string[]): number => {
+  if (dates.length === 0) return 0;
   const sorted = [...dates].sort();
   let streak = 1;
   let maxStreak = 1;
