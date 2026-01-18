@@ -19,12 +19,20 @@ Zali is a fun, lightweight Web3 game designed to showcase:
 Players can:
 
 1. Connect their Web3 wallet (MetaMask, Coinbase Wallet, etc.)
-2. Register a username
-3. Play **free trivia rounds** (no entry fee)
-4. Answer timed trivia questions
-5. Earn ETH rewards paid automatically via smart contracts
+2. Play **free trivia rounds** (no entry fee)
+3. Answer multiple choice trivia questions
+4. Earn USDC rewards paid automatically via smart contracts
+
+**🚧 Future Features (TriviaGameV2):**
+- Username registration and player profiles
+- Global leaderboard with rankings
+- Timed game sessions with speed bonuses
+- ETH rewards with weekly prize pools
+- Chainlink VRF for fair question randomization
 
 No staking. No long setup. Just **connect → play → earn**.
+
+---
 
 ---
 
@@ -35,19 +43,30 @@ No staking. No long setup. Just **connect → play → earn**.
 ### Production Contracts
 
 * **SimpleTriviaGame:** [`0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d`](https://basescan.org/address/0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d)
+  - ✅ **DEPLOYED & VERIFIED** on Base Mainnet
+  - ✅ **25 trivia questions** loaded
+  - ✅ **USDC rewards** (0.1 USDC per correct answer)
+  - ✅ **Basic gameplay** - answer questions, earn rewards
 * **USDC (Base Mainnet):** [`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`](https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)
 * **Network:** Base Mainnet (Chain ID: 8453)
 * **Compiler:** Solc v0.8.30
 * **Optimization:** 200 runs
 
-### Contract Details
+### Contract Features (Current: SimpleTriviaGame)
 
-| Property | Value |
-|----------|-------|
-| **Deployer** | `0x2c8D82a53f11B0E9B527a111B2f53C5D5E809806` |
-| **Gas Used** | 2,913,596 |
-| **Deploy Cost** | ~$0.05 |
-| **Initial Questions** | 5 trivia questions |
+**✅ Currently Available:**
+- Answer multiple choice trivia questions
+- Earn USDC rewards for correct answers
+- Owner can add new questions
+- Basic score tracking per wallet address
+
+**🚧 Planned Features (TriviaGameV2 Upgrade):**
+- Username registration and profiles
+- Global leaderboard with rankings
+- Chainlink VRF for random question selection
+- Game sessions with time limits and speed bonuses
+- ETH rewards with weekly prize pools
+- Advanced player statistics
 | **Reward per Answer** | 0.1 USDC |
 
 ### Quick Links
@@ -117,7 +136,8 @@ Web3 Wallet → Register Username → Start Game → Answer Questions → Submit
 
 ```
 +------------------+      +----------------------+     +----------------------+
-|  Frontend (Next) | <--> | TriviaGameV2.sol     | <-> | Chainlink VRF V2     |
+|  Frontend (Next) | <--> | SimpleTriviaGame.sol | <-> | USDC Token         |
+|  Frontend (Next) | <--> | TriviaGameV2.sol     | <-> | Chainlink VRF V2     | *(planned)*
 +------------------+      +----------------------+     +----------------------+
          |                          |
          |                          |
@@ -195,28 +215,42 @@ Zali/
 
 # 🔐 **Smart Contracts**
 
-### **TriviaGameV2.sol** (Main Contract)
+### **SimpleTriviaGame.sol** *(Currently Deployed)*
 
-Manages the complete trivia game with leaderboard, VRF randomness, and ETH rewards.
+Basic trivia game contract deployed on Base Mainnet.
 
-Key features:
+**✅ Current Features:**
+- USDC rewards for correct answers
+- Owner can add/manage questions
+- Basic score tracking per wallet
+- Multiple choice questions
+
+**Key functions:**
+```solidity
+function addQuestion(string memory _questionText, string[] memory _options, uint256 _correctOption, uint256 _rewardAmount) external onlyOwner;
+function submitAnswer(uint256 _questionId, uint256 _selectedOption) external;
+function getQuestion(uint256 _questionId) external view returns (...);
+```
+
+### **TriviaGameV2.sol** *(Planned Upgrade)*
+
+Advanced trivia game with full feature set.
+
+**🚧 Planned Features:**
 - Username registration system
 - Chainlink VRF V2 for random question selection
-- On-chain question storage
-- Automatic ETH reward distribution
-- Leaderboard tracking (top 100 players)
-- Weekly reward pools for top players
-- Speed bonus calculations
+- Game sessions with time limits and speed bonuses
+- Global leaderboard (top 100 players)
+- ETH rewards with weekly prize pools
+- Advanced player statistics
 
-Key functions:
-
+**Key functions:**
 ```solidity
 function registerUsername(string memory _username) external;
 function startGame() external returns (uint256 sessionId);
 function submitAnswers(uint256 _sessionId, uint8[] calldata _answers) external;
 function claimRewards() external;
 function getLeaderboard(uint256 _count) external view returns (...);
-function addQuestion(...) external onlyOwner;
 ```
 
 ### **Faucet.sol** (Optional - Testnet Only)
@@ -224,7 +258,6 @@ function addQuestion(...) external onlyOwner;
 Provides a one-time 10 USDC claim per user for testing.
 
 Key functions:
-
 ```solidity
 function claim() external;
 function withdrawTokens(uint256 amount) external onlyOwner;
@@ -264,10 +297,11 @@ npm install
 Create a `.env.local` file in `/frontend`:
 
 ```bash
-# Contract Addresses (update after deployment)
-NEXT_PUBLIC_TRIVIA_GAME_V2_ADDRESS=0x...
-NEXT_PUBLIC_FAUCET_ADDRESS=0x... # Optional - testnet only
-NEXT_PUBLIC_MOCK_VRF_ADDRESS=0x... # Optional - for testing
+# Contract Addresses (Base Mainnet)
+NEXT_PUBLIC_TRIVIA_GAME_ADDRESS=0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d  # SimpleTriviaGame (current)
+NEXT_PUBLIC_TRIVIA_GAME_V2_ADDRESS=0x...                                    # TriviaGameV2 (planned)
+NEXT_PUBLIC_FAUCET_ADDRESS=0x707ECcbbFa9073F1e5A5675F22473956FE36FC8d      # Optional - testnet only
+NEXT_PUBLIC_MOCK_VRF_ADDRESS=0x...                                         # Optional - for testing
 
 # Network Configuration
 NEXT_PUBLIC_RPC_URL=https://mainnet.base.org
@@ -280,7 +314,7 @@ PRIVATE_KEY=your_private_key_here
 ```
 
 ### Network Details:
-- **Base Mainnet**: Chain ID `8453`
+- **Base Mainnet**: Chain ID `8453` (currently deployed)
 - **Base Sepolia (Testnet)**: Chain ID `84532`
 
 ---
