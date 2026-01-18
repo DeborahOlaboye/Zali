@@ -8,6 +8,12 @@ import {TriviaGameV2} from "../src/TriviaGameV2.sol";
  * @title DeployTriviaGameV2
  * @dev Deployment script for TriviaGameV2 on Base Mainnet
  * Features: username registration, leaderboard, Chainlink VRF, ETH rewards
+ *
+ * PRE-DEPLOYMENT REQUIREMENTS:
+ * 1. Create Chainlink VRF V2 subscription on https://vrf.chain.link
+ * 2. Fund subscription with LINK tokens
+ * 3. Update SUBSCRIPTION_ID in this script
+ * 4. Add deployed contract as VRF consumer after deployment
  */
 contract DeployTriviaGameV2 is Script {
     // Base Mainnet Chainlink VRF V2 Configuration
