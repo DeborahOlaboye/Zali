@@ -145,10 +145,12 @@ export const createGameSlice: StateCreator<
       'game/submitAnswer'
     );
 
-    // Check for achievements after answer
-    if (isCorrect && timeTaken && timeTaken < 5000 && !(get() as any).achievements.find((a: any) => a.id === 'speed-demon')?.isUnlocked) {
+    // Check speed demon achievement
+    if (timeTaken && timeTaken < 5000 && isCorrect && !(get() as any).achievements.find((a: any) => a.id === 'speed-demon')?.isUnlocked) {
       (get() as any).unlockAchievement('speed-demon');
     }
+
+    // Check for achievements after answer
     (get() as any).checkAchievements();
 
     return isCorrect;
