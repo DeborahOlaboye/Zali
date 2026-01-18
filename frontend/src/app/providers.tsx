@@ -4,8 +4,9 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { config } from '../../config/web3';
 import { AppKitProvider } from '../components/AppKitProvider';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { WalletErrorBoundary } from '@/components/WalletErrorBoundary';
+import { initAnalytics } from '@/lib/analytics';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +19,10 @@ const queryClient = new QueryClient({
 });
 
 function ProvidersInner({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>

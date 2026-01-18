@@ -5,10 +5,13 @@ import { useAccount } from 'wagmi';
 import { motion } from 'framer-motion';
 import { useLeaderboard } from '@/hooks/useContract';
 import { LeaderboardSkeleton, StatsCardSkeleton } from '@/components/skeletons';
+import { LoadingButton, LoadingCard, useLoading } from '@/components/loading';
+import { RetryableOperation, RetryUI, AsyncBoundary } from '@/async';
 
 export default function LeaderboardPage() {
   const { isConnected } = useAccount();
   const { leaderboardData, leaderboardState, refetchLeaderboard } = useLeaderboard(10);
+  const { setLoading, clearLoading } = useLoading({ component: 'leaderboard-page' });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 py-8 px-4">
@@ -81,12 +84,14 @@ export default function LeaderboardPage() {
                 <div className="text-6xl mb-4">🎮</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No Players Yet</h3>
                 <p className="text-gray-600 mb-6">Be the first to play and claim the top spot!</p>
-                <button
+                <LoadingButton
                   onClick={() => window.location.href = '/play'}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
+                  variant="primary"
+                  size="md"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 >
                   Start Playing
-                </button>
+                </LoadingButton>
               </div>
             )}
           </div>

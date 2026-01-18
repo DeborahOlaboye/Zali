@@ -5,20 +5,37 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAccount, useDisconnect } from 'wagmi';
 import { AnimatePresence, motion } from 'framer-motion';
+import { NavbarProps, NavLinkProps } from '@/types/components';
+import { Address } from '@/types/web3';
+import { WalletErrorBoundary } from '@/components/WalletErrorBoundary';
+
+interface AppKitInstance {
+  open: () => void;
+}
+
+interface UseClientAppKitReturn {
+  open: () => void;
+  isReady: boolean;
+}
+
+interface NavLink {
+  readonly name: string;
+  readonly href: string;
+}
 
 // Client-side AppKit hook
-function useClientAppKit() {
-  const [appKit, setAppKit] = useState<any>(null);
-  const [isReady, setIsReady] = useState(false);
+function useClientAppKit(): UseClientAppKitReturn {
+  const [appKit, setAppKit] = useState<AppKitInstance | null>(null);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const { useAppKit } = require('@reown/appkit/react');
-        const kit = useAppKit();
+        const kit: AppKitInstance = useAppKit();
         setAppKit(kit);
         setIsReady(true);
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('AppKit not available:', error);
         setIsReady(true); // Still set ready to avoid infinite loading
       }
@@ -37,15 +54,18 @@ function useClientAppKit() {
   };
 }
 
-export default function Navbar() {
+export default function Navbar({ className = '', 'data-testid': testId }: NavbarProps = {}) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
   const { open, isReady } = useClientAppKit();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
+
+  // Type-safe address handling
+  const formattedAddress = address as Address | undefined;
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -88,7 +108,7 @@ export default function Navbar() {
     };
   }, [mobileMenuOpen]);
 
-  const navLinks = [
+  const navLinks: readonly NavLink[] = [
     { name: 'Home', href: '/' },
     { name: 'Play', href: '/play' },
     { name: 'Rewards', href: '/rewards' },
@@ -97,7 +117,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="border-b border-gray-200 bg-white shadow-sm">
+    <nav className={`border-b border-gray-200 bg-white shadow-sm ${className}`} data-testid={testId}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -125,73 +145,77 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="flex items-center space-x-2">
-              {!isReady ? (
-                <div className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md">
-                  Loading...
-                </div>
-              ) : isConnected ? (
-                <>
+              <WalletErrorBoundary onReconnect={() => open()}>
+                {!isReady ? (
+                  <div className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md">
+                    Loading...
+                  </div>
+                ) : isConnected ? (
+                  <>
+                    <button
+                      onClick={() => open()}
+                      className="px-3 py-2 text-sm bg-green-100 text-green-700 hover:bg-green-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+                      aria-label={`Connected wallet: ${formattedAddress?.slice(0, 6)}...${formattedAddress?.slice(-4)}`}
+                    >
+                      {formattedAddress?.slice(0, 6)}...{formattedAddress?.slice(-4)}
+                    </button>
+                    <button
+                      onClick={() => disconnect()}
+                      className="px-3 py-1 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+                      aria-label="Disconnect wallet"
+                    >
+                      Disconnect
+                    </button>
+                  </>
+                ) : (
                   <button
                     onClick={() => open()}
-                    className="px-3 py-2 text-sm bg-green-100 text-green-700 hover:bg-green-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
-                    aria-label={`Connected wallet: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
+                    className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-800 focus:ring-offset-2"
+                    aria-label="Connect wallet"
                   >
-                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                    Connect Wallet
                   </button>
-                  <button
-                    onClick={() => disconnect()}
-                    className="px-3 py-1 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
-                    aria-label="Disconnect wallet"
-                  >
-                    Disconnect
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => open()}
-                  className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-800 focus:ring-offset-2"
-                  aria-label="Connect wallet"
-                >
-                  Connect Wallet
-                </button>
-              )}
+                )}
+              </WalletErrorBoundary>
             </div>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
-            <div className="flex items-center space-x-1">
-              {!isReady ? (
-                <div className="px-2 py-1 text-xs bg-gray-300 text-gray-600 rounded">
-                  ...
-                </div>
-              ) : isConnected ? (
-                <>
+            <WalletErrorBoundary onReconnect={() => open()}>
+              <div className="flex items-center space-x-1">
+                {!isReady ? (
+                  <div className="px-2 py-1 text-xs bg-gray-300 text-gray-600 rounded">
+                    ...
+                  </div>
+                ) : isConnected ? (
+                  <>
+                    <button
+                      onClick={() => open()}
+                      className="px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-600"
+                      aria-label={`Connected wallet: ${formattedAddress?.slice(0, 4)}...${formattedAddress?.slice(-2)}`}
+                    >
+                      {formattedAddress?.slice(0, 4)}...{formattedAddress?.slice(-2)}
+                    </button>
+                    <button
+                      onClick={() => disconnect()}
+                      className="px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-600"
+                      aria-label="Disconnect wallet"
+                    >
+                      ✕
+                    </button>
+                  </>
+                ) : (
                   <button
                     onClick={() => open()}
-                    className="px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-600"
-                    aria-label={`Connected wallet: ${address?.slice(0, 4)}...${address?.slice(-2)}`}
+                    className="px-3 py-1 text-xs bg-green-600 text-white hover:bg-green-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-800"
+                    aria-label="Connect wallet"
                   >
-                    {address?.slice(0, 4)}...{address?.slice(-2)}
+                    Connect
                   </button>
-                  <button
-                    onClick={() => disconnect()}
-                    className="px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-600"
-                    aria-label="Disconnect wallet"
-                  >
-                    ✕
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => open()}
-                  className="px-3 py-1 text-xs bg-green-600 text-white hover:bg-green-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-800"
-                  aria-label="Connect wallet"
-                >
-                  Connect
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            </WalletErrorBoundary>
             <button
               ref={menuButtonRef}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -311,9 +335,9 @@ export default function Navbar() {
                           setMobileMenuOpen(false);
                         }}
                         className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-inset"
-                        aria-label={`Connected wallet: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
+                        aria-label={`Connected wallet: ${formattedAddress?.slice(0, 6)}...${formattedAddress?.slice(-4)}`}
                       >
-                        Wallet: {address?.slice(0, 6)}...{address?.slice(-4)}
+                        Wallet: {formattedAddress?.slice(0, 6)}...{formattedAddress?.slice(-4)}
                       </button>
                       <button
                         onClick={() => {
