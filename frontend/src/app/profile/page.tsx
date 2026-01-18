@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePlayerRegistration, useRewards, useCeloBalance } from '@/hooks/useContract';
+import { usePlayerRegistration } from '@/hooks/useGameQueries';
+import { useRewards } from '@/hooks/useRewardManagement';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
