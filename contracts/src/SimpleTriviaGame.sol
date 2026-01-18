@@ -15,6 +15,10 @@ contract SimpleTriviaGame is Ownable {
     error QuestionNotActive();
     error InvalidOption();
     error InsufficientBalance();
+    
+    enum Difficulty { Easy, Medium, Hard }
+    enum Category { Celo, DeFi, Web3, GeneralCrypto, NFTs, DAOs }
+    
     IERC20 public immutable usdcToken;
     uint256 public questionId;
     
@@ -24,6 +28,8 @@ contract SimpleTriviaGame is Ownable {
         uint256 correctOption;
         uint256 rewardAmount;
         bool isActive;
+        Category category;
+        Difficulty difficulty;
     }
     
     mapping(uint256 => Question) public questions;
@@ -41,7 +47,9 @@ contract SimpleTriviaGame is Ownable {
         string memory _questionText,
         string[] memory _options,
         uint256 _correctOption,
-        uint256 _rewardAmount
+        uint256 _rewardAmount,
+        Category _category,
+        Difficulty _difficulty
     ) external onlyOwner {
         if (_options.length <= 1) revert InvalidOptions();
         if (_correctOption >= _options.length) revert InvalidCorrectOption();
@@ -52,7 +60,9 @@ contract SimpleTriviaGame is Ownable {
             options: _options,
             correctOption: _correctOption,
             rewardAmount: _rewardAmount,
-            isActive: true
+            isActive: true,
+            category: _category,
+            difficulty: _difficulty
         });
         
         emit QuestionAdded(questionId, _questionText, _rewardAmount);
@@ -85,9 +95,11 @@ contract SimpleTriviaGame is Ownable {
         string[] memory options,
         uint256 correctOption,
         uint256 rewardAmount,
-        bool isActive
+        bool isActive,
+        Category category,
+        Difficulty difficulty
     ) {
         Question storage q = questions[_questionId];
-        return (q.questionText, q.options, q.correctOption, q.rewardAmount, q.isActive);
+        return (q.questionText, q.options, q.correctOption, q.rewardAmount, q.isActive, q.category, q.difficulty);
     }
 }
