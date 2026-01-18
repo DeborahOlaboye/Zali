@@ -7,20 +7,58 @@ export const FAUCET_ABI = [
   'function withdraw() external',
 ] as const;
 
-export const TRIVIA_GAME_ABI = [
-  'function createGame(string memory _title, uint256 _entryFee, uint256 _maxPlayers, uint256 _startTime, uint256 _endTime) external',
-  'function joinGame(uint256 _gameId) external',
-  'function submitAnswers(uint256 _gameId, uint8[] calldata _answers) external',
-  'function claimPrize(uint256 _gameId) external',
-  'function cancelGame(uint256 _gameId) external',
-  'function getGame(uint256 _gameId) external view returns (Game memory)',
-  'function getPlayerGames(address _player) external view returns (uint256[] memory)',
-  'function getActiveGames() external view returns (uint256[])',
-  'function getGamePlayers(uint256 _gameId) external view returns (address[] memory)',
-  'function getGameWinners(uint256 _gameId) external view returns (address[] memory)',
-  'function getGameState(uint256 _gameId) external view returns (uint8)',
-  'function getGamePrizePool(uint256 _gameId) external view returns (uint256)',
-  'function hasPlayerPlayed(uint256 _gameId, address _player) external view returns (bool)',
+export const TRIVIA_GAME_V2_ABI = [
+  // Player Registration
+  'function registerUsername(string memory _username) external',
+  'function updateUsername(string memory _newUsername) external payable',
+  'function isUsernameAvailable(string memory _username) external view returns (bool)',
+
+  // Game Functions
+  'function startGame() external returns (uint256 sessionId)',
+  'function submitAnswers(uint256 _sessionId, uint8[] calldata _answers) external',
+  'function claimRewards() external',
+  'function claimSessionRewards(uint256[] calldata _sessionIds) external',
+
+  // View Functions
+  'function getPlayerInfo(address _player) external view returns (string memory username, uint256 totalScore, uint256 gamesPlayed, uint256 correctAnswers, uint256 totalQuestions, uint256 bestScore, uint256 rank)',
+  'function getLeaderboard(uint256 _count) external view returns (address[] memory addresses, string[] memory usernames, uint256[] memory scores)',
+  'function getSession(address _player, uint256 _sessionId) external view returns (uint256[] memory questionIds, uint8[] memory answers, uint8 correctCount, uint256 score, uint256 reward, uint256 startTime, uint256 endTime, bool completed, bool rewardClaimed)',
+  'function getQuestion(uint256 _questionId) external view returns (string memory questionText, string[4] memory options, string memory category)',
+  'function getPendingRewards(address _player) external view returns (uint256)',
+  'function getUnclaimedSessions(address _player) external view returns (uint256[] memory)',
+
+  // Question Management (Owner)
+  'function addQuestion(string memory _questionText, string[4] memory _options, uint8 _correctAnswer, string memory _category) external',
+  'function addQuestions(string[] memory _questionTexts, string[4][] memory _options, uint8[] memory _correctAnswers, string[] memory _categories) external',
+  'function updateQuestion(uint256 _questionId, string memory _questionText, string[4] memory _options, uint8 _correctAnswer, string memory _category, bool _isActive) external',
+
+  // Admin Functions
+  'function fundRewards() external payable',
+  'function distributeRewards() external',
+  'function emergencyWithdraw(uint256 _amount) external',
+
+  // Constants and State
+  'function QUESTIONS_PER_SESSION() external view returns (uint256)',
+  'function TIME_LIMIT() external view returns (uint256)',
+  'function LEADERBOARD_SIZE() external view returns (uint256)',
+  'function questions(uint256) external view returns (string memory questionText, string[4] memory options, uint8 correctAnswer, string memory category, bool isActive)',
+  'function players(address) external view returns (string memory username, uint256 totalScore, uint256 gamesPlayed, uint256 correctAnswers, uint256 totalQuestions, uint256 bestScore, bool isRegistered)',
+  'function leaderboard(uint256) external view returns (address)',
+  'function weeklyRewardPool() external view returns (uint256)',
+  'function getContractBalance() external view returns (uint256)',
+  'function getQuestionCount() external view returns (uint256)',
+  'function getPlayerSessionCount(address _player) external view returns (uint256)',
+
+  // Events
+  'event PlayerRegistered(address indexed player, string username)',
+  'event UsernameUpdated(address indexed player, string oldUsername, string newUsername)',
+  'event GameStarted(address indexed player, uint256 sessionId, uint256 requestId)',
+  'event QuestionsAssigned(address indexed player, uint256 sessionId, uint256[] questionIds)',
+  'event GameCompleted(address indexed player, uint256 sessionId, uint256 score, uint8 correctCount, uint256 reward)',
+  'event RewardClaimed(address indexed player, uint256 amount)',
+  'event LeaderboardUpdated(address indexed player, uint256 newRank, uint256 totalScore)',
+  'event WeeklyRewardsDistributed(uint256 totalAmount, uint256 timestamp)',
+  'event QuestionAdded(uint256 indexed questionId, string category)',
 ] as const;
 
 export const USDC_ABI = [
@@ -37,15 +75,15 @@ export const CONTRACTS = {
     abi: FAUCET_ABI,
   },
   triviaGame: {
-    address: '0xc4AE01295cfAE3DA96b044F1a4284A93837a644C' as `0x${string}`, // Update after Base deployment
+    address: '0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d' as `0x${string}`, // SimpleTriviaGame (current)
     abi: TRIVIA_GAME_ABI,
   },
   triviaGameV2: {
-    address: '0xc4AE01295cfAE3DA96b044F1a4284A93837a644C' as `0x${string}`, // Update after Base deployment
-    abi: TRIVIA_GAME_ABI,
+    address: '0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d' as `0x${string}`, // Update after TriviaGameV2 deployment
+    abi: TRIVIA_GAME_V2_ABI,
   },
   USDC: {
-    address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`, // Base Sepolia USDC
+    address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as `0x${string}`, // Base Sepolia USDC
     abi: USDC_ABI,
   },
 } as const;
