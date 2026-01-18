@@ -4,50 +4,108 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
-import { usePlayerRegistration, useGameSession, useCeloBalance, useContractInfo, useQuestions } from '@/hooks/useContract';
-import { PlayerInfoSkeleton, StatsCardSkeleton } from '@/components/skeletons';
-import { GAME_CONSTANTS } from '@/config/contracts';
-
+import { useSimpleTriviaGame } from '@/hooks/useContract';
+import { useReadContract } from 'wagmi';
+import { CONTRACTS } from '@/config/contracts';
 
 export default function PlayPage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
-  const [isStarting, setIsStarting] = useState(false);
-  
-  const { isRegistered, playerInfo, refetchPlayerInfo } = usePlayerRegistration();
 
-  // Refetch player info when page loads to ensure fresh data
-  useEffect(() => {
-    if (address) {
-      refetchPlayerInfo();
-    }
-  }, [address, refetchPlayerInfo]);
-  const { 
-    startGame, 
-    startGameIsLoading, 
-    startGameIsSuccess, 
-    startGameError,
-    needsApproval,
-    hasSufficientApproval,
-    isApprovalLoading,
-    isApproving,
-    isWaitingForApproval,
-    approve,
-    refetchAllowance,
-  } = useGameSession();
-  const { balance } = useCeloBalance();
-  const { questionCount } = useQuestions();
-  const { contractBalance } = useContractInfo();
+  const { userScore, getQuestion } = useSimpleTriviaGame();
 
-  // Redirect to game on successful start
-  useEffect(() => {
-    if (startGameIsSuccess && isStarting) {
-      toast.dismiss();
-      toast.success('Game started! Loading questions...');
-      setIsStarting(false);
-      router.push('/play/game');
-    }
+  // Get total questions count
+  const { data: questionCount } = useReadContract({
+    address: CONTRACTS.triviaGame.address,
+    abi: ['function questionId() external view returns (uint256)'],
+    functionName: 'questionId',
+  });
+
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Connect Your Wallet</h1>
+          <p className="text-gray-600 mb-6">Please connect your wallet to start playing</p>
+          <div className="animate-pulse bg-gray-200 h-12 rounded-lg"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            🎮 Play Trivia
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Answer questions and earn USDC rewards!
+          </p>
+        </motion.div>
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        >
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-purple-600">{userScore?.toString() || '0'}</div>
+            <div className="text-gray-600">Your Score</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-blue-600">{questionCount?.toString() || '0'}</div>
+            <div className="text-gray-600">Questions Available</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-green-600">0.1</div>
+            <div className="text-gray-600">USDC per Correct Answer</div>
+          </div>
+        </motion.div>
+
+        {/* Game Options */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+        >
+          <div className="p-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+            <h2 className="text-2xl font-bold">Choose Your Game Mode</h2>
+            <p className="text-purple-100">Select how you want to play</p>
+          </div>
+
+          <div className="p-6 space-y-4">
+            <div className="border-2 border-purple-200 rounded-xl p-6 hover:border-purple-400 transition-colors">
+              <h3 className="text-xl font-bold mb-2">🎯 Quick Play</h3>
+              <p className="text-gray-600 mb-4">Answer individual questions for immediate rewards</p>
+              <button
+                onClick={() => router.push('/play/quick')}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              >
+                Start Quick Play
+              </button>
+            </div>
+
+            <div className="border-2 border-gray-200 rounded-xl p-6 opacity-50">
+              <h3 className="text-xl font-bold mb-2">🏆 Tournament Mode</h3>
+              <p className="text-gray-600 mb-4">Timed sessions with leaderboards and bonus rewards</p>
+              <p className="text-sm text-gray-500">🚧 Coming with TriviaGameV2 upgrade</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
   }, [startGameIsSuccess, router, isStarting]);
 
   // Handle start error
