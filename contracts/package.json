@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "deploy:trivia-v2": "forge script script/DeployTriviaGameV2.s.sol --rpc-url $BASE_MAINNET_RPC_URL --broadcast --verify",
+    "deploy:simple": "forge script script/DeploySimpleMainnet.s.sol --rpc-url $BASE_MAINNET_RPC_URL --broadcast --verify"
+  },
   "dependencies": {
     "dotenv": "^17.2.3",
     "ethers": "^6.16.0"
