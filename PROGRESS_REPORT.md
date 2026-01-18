@@ -7,11 +7,13 @@
 ## ✅ Completed Milestones
 
 ### Contract Deployment
-- [x] Deployed SimpleTriviaGame to Base Mainnet
+- [x] Deployed SimpleTriviaGame to Base Mainnet (interim)
 - [x] Contract Address: `0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d`
 - [x] Verified on BaseScan ⏳ (in progress)
 - [x] Initial 5 questions deployed
 - [x] Adding 20 more questions (in progress)
+- [x] **Issue #134 Resolved:** Contract version confusion addressed
+- [ ] Deploy TriviaGameV2 with full features (leaderboard, VRF, usernames)
 
 ### GitHub Activity
 - [x] Repository made PUBLIC ✨
