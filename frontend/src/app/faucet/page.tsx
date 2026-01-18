@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { CONTRACTS } from '@/config/contracts';
-import { useFaucet } from '@/hooks/useContract';
+import { useFaucet } from '@/hooks/useFaucetQueries';
 
 export default function FaucetPage() {
   const { address } = useAccount();
