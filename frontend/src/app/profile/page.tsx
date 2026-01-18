@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { sanitizeUsername } from '@/utils/sanitize';
 import { PlayerInfoSkeleton, StatsCardSkeleton } from '@/components/skeletons';
+import { useStore } from '@/store';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function ProfilePage() {
   const { playerInfo, isRegistered, updateUsername, updateIsLoading } = usePlayerRegistration();
   const { pendingRewards } = useRewards();
   const { balance } = useCeloBalance();
+  
+  const { achievements } = useStore();
   
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
@@ -186,7 +189,7 @@ export default function ProfilePage() {
         {!username ? (
           <StatsCardSkeleton count={3} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -235,6 +238,28 @@ export default function ProfilePage() {
               <p className="text-sm text-gray-600">
                 {correctAnswers.toString()}/{totalQuestions.toString()} correct
               </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white p-6 rounded-2xl shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-700">Achievements</h3>
+                <div className="text-3xl">🏆</div>
+              </div>
+              <p className="text-3xl font-bold text-orange-600 mb-1">{achievements.filter(a => a.isUnlocked).length}</p>
+              <p className="text-sm text-gray-600">
+                {achievements.filter(a => a.isUnlocked).length}/{achievements.length} unlocked
+              </p>
+              <button
+                onClick={() => router.push('/achievements')}
+                className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm"
+              >
+                View All
+              </button>
             </motion.div>
           </div>
         )}
