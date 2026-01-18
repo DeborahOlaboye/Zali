@@ -28,6 +28,13 @@
 - Documentation
 - Question addition
 - Progress tracking
+- **Issue #134 Resolution:** Contract version confusion fixed
+
+### 5. ✅ ISSUE #134 RESOLVED - CONTRACT VERSION CLARITY
+- **Problem:** Documentation described TriviaGameV2 features, but SimpleTriviaGame was deployed
+- **Solution:** Restored TriviaGameV2 contract, updated frontend, clarified roadmap
+- **Impact:** Frontend now matches documented features, ready for full deployment
+- **Status:** Ready for TriviaGameV2 deployment with leaderboard, VRF, and usernames
 - Technical guides
 
 ## 📊 Current Statistics
