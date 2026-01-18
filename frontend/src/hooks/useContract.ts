@@ -12,42 +12,92 @@ export interface LoadingState {
   error: Error | null;
 }
 
-// ============ TRIVIA GAME V2 HOOKS ============
+// ============ SIMPLE TRIVIA GAME HOOKS (Current Deployed Contract) ============
 
 /**
- * Hook for player registration and username management
+ * Hook for basic trivia game interactions with SimpleTriviaGame
  */
-export function usePlayerRegistration() {
+export function useSimpleTriviaGame() {
   const { address } = useAccount();
-  const [isFetchingPlayerInfo, setIsFetchingPlayerInfo] = useState(false);
-  const [playerInfoError, setPlayerInfoError] = useState<Error | null>(null);
 
-  // Check if player is registered
-  const { 
-    data: playerInfo, 
-    refetch: refetchPlayerInfo,
-    isFetching: isFetchingPlayerInfoQuery,
-    isError: isPlayerInfoError,
-    error: playerInfoQueryError
+  // Get user score
+  const {
+    data: userScore,
+    refetch: refetchUserScore,
   } = useReadContract({
-    address: CONTRACTS.triviaGameV2.address,
-    abi: CONTRACTS.triviaGameV2.abi,
-    functionName: 'getPlayerInfo',
+    address: CONTRACTS.triviaGame.address,
+    abi: [
+      'function userScores(address) external view returns (uint256)',
+    ],
+    functionName: 'userScores',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
     },
   });
 
-  // Update loading state when fetching player info
-  useEffect(() => {
-    setIsFetchingPlayerInfo(isFetchingPlayerInfoQuery);
-    if (isPlayerInfoError) {
-      setPlayerInfoError(playerInfoQueryError || new Error('Failed to fetch player info'));
-    } else if (playerInfoQueryError === null) {
-      setPlayerInfoError(null);
+  // Get question
+  const getQuestion = useCallback((questionId: number) => {
+    return useReadContract({
+      address: CONTRACTS.triviaGame.address,
+      abi: [
+        'function getQuestion(uint256) external view returns (string memory, string[] memory, uint256, uint256, bool)',
+      ],
+      functionName: 'getQuestion',
+      args: [questionId],
+    });
+  }, []);
+
+  // Submit answer
+  const { writeContract: submitAnswer, isPending: isSubmitting } = useWriteContract();
+
+  const submitTriviaAnswer = useCallback((questionId: number, selectedOption: number) => {
+    if (!address) return;
+
+    submitAnswer({
+      address: CONTRACTS.triviaGame.address,
+      abi: [
+        'function submitAnswer(uint256, uint256) external',
+      ],
+      functionName: 'submitAnswer',
+      args: [questionId, selectedOption],
+    });
+  }, [address, submitAnswer]);
+
+  return {
+    userScore: userScore as bigint | undefined,
+    refetchUserScore,
+    getQuestion,
+    submitTriviaAnswer,
+    isSubmitting,
+  };
+}
+
+/**
+ * Hook for leaderboard (simplified - just shows scores)
+ */
+export function useSimpleLeaderboard() {
+  // Since SimpleTriviaGame doesn't have a leaderboard, we'll show basic stats
+  // This is a placeholder until TriviaGameV2 is deployed
+  return {
+    leaderboardData: [],
+    leaderboardState: { isLoading: false, isError: false },
+    refetchLeaderboard: () => {},
+  };
+}
+
+/**
+ * Hook for player registration (simplified - no registration needed)
+ */
+export function usePlayerRegistration() {
+  // SimpleTriviaGame doesn't require registration
+  return {
+    isRegistered: true, // Always "registered" for SimpleTriviaGame
+    registerUsername: () => {},
+    registerState: { isLoading: false, isSuccess: true, isError: false, error: null },
+    refetchPlayerInfo: () => {},
+  };
+}
     }
   }, [isFetchingPlayerInfoQuery, isPlayerInfoError, playerInfoQueryError]);
 
