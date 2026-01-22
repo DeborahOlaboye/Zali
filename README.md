@@ -43,7 +43,7 @@ No staking. No long setup. Just **connect → play → earn**.
 ### Contract Details
 
 | Property | Value |
-|----------|-------|
+|------------------------|---------------------------------------------|
 | **Deployer** | `0x2c8D82a53f11B0E9B527a111B2f53C5D5E809806` |
 | **Gas Used** | 2,913,596 |
 | **Deploy Cost** | ~$0.05 |
@@ -87,6 +87,8 @@ No staking. No long setup. Just **connect → play → earn**.
 * Earn **0.005 ETH bonus** for perfect score (10/10)
 * Earn up to **0.002 ETH speed bonus** for fast answers
 * **Max reward per game: 0.017 ETH**
+* **Bulk Reward Distribution**: Distribute rewards to up to 30 players simultaneously
+* **Bulk Answer Submission**: Submit answers to up to 20 questions in one transaction
 * Rewards distributed automatically via smart contract
 
 ### 🏆 **Leaderboard**
@@ -237,7 +239,7 @@ function withdrawTokens(uint256 amount) external onlyOwner;
 ## 1️⃣ Clone the Repo
 
 ```bash
-git clone https://github.com/yourname/zali.git
+git clone https://github.com/AdekunleBamz/Zali.git
 cd Zali
 ```
 
