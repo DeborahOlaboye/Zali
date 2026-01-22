@@ -43,7 +43,7 @@ No staking. No long setup. Just **connect → play → earn**.
 ### Contract Details
 
 | Property | Value |
-|----------|-------|
+|------------------------|---------------------------------------------|
 | **Deployer** | `0x2c8D82a53f11B0E9B527a111B2f53C5D5E809806` |
 | **Gas Used** | 2,913,596 |
 | **Deploy Cost** | ~$0.05 |
