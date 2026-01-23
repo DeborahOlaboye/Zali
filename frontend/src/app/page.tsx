@@ -19,10 +19,10 @@ export default function Home() {
                 Zali: Learn, Play, Earn
               </h1>
               <p className="text-xl sm:text-2xl text-gray-700 mb-4 max-w-3xl mx-auto">
-                Learn about Celo & DeFi while earning real cUSD rewards via MiniPay
+                Learn about Base & DeFi while earning real USDC rewards via MiniPay
               </p>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Mobile-first trivia game optimized for MiniPay with seamless cUSD rewards
+                Mobile-first trivia game optimized for MiniPay with seamless USDC rewards
               </p>
             </motion.div>
 
@@ -36,7 +36,7 @@ export default function Home() {
                 href="/faucet"
                 className="px-8 py-4 bg-green-600 text-white rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-800 focus:ring-offset-2"
               >
-                🪙 Claim Free cUSD
+                🪙 Claim Free USDC
               </Link>
               <Link
                 href="/play"
@@ -56,11 +56,11 @@ export default function Home() {
               aria-label="Key game statistics"
             >
               <div className="bg-white rounded-xl p-6 shadow-md">
-                <div className="text-3xl font-bold text-green-600 mb-2" aria-label="Entry Fee amount">0.05 cUSD</div>
+                <div className="text-3xl font-bold text-green-600 mb-2" aria-label="Entry Fee amount">0.05 USDC</div>
                 <div className="text-gray-600">Entry Fee</div>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-md">
-                <div className="text-3xl font-bold text-yellow-600 mb-2" aria-label="Maximum rewards amount">0.17 cUSD</div>
+                <div className="text-3xl font-bold text-yellow-600 mb-2" aria-label="Maximum rewards amount">0.17 USDC</div>
                 <div className="text-gray-600">Max Rewards</div>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-md">
@@ -87,22 +87,22 @@ export default function Home() {
               {
                 icon: '🪙',
                 title: 'Claim Tokens',
-                description: 'Get free cUSD from our faucet via MiniPay',
+                description: 'Get free USDC from our faucet via MiniPay',
               },
               {
                 icon: '🎮',
                 title: 'Play Trivia',
-                description: 'Answer 10 questions about Celo & DeFi for 0.05 cUSD',
+                description: 'Answer 10 questions about Base & DeFi for 0.05 USDC',
               },
               {
                 icon: '💰',
-                title: 'Win cUSD',
-                description: 'Earn up to 0.17 cUSD per game with instant payouts',
+                title: 'Win USDC',
+                description: 'Earn up to 0.17 USDC per game with instant payouts',
               },
               {
                 icon: '📱',
                 title: 'MiniPay Ready',
-                description: 'Seamless experience with cUSD gas payments',
+                description: 'Seamless experience with USDC gas payments',
               },
             ].map((feature, index) => (
               <motion.article
@@ -133,17 +133,17 @@ export default function Home() {
               {
                 icon: '📚',
                 title: 'Educational',
-                description: 'Learn about Celo, DeFi, and MiniPay while earning cUSD rewards',
+                description: 'Learn about Base, DeFi, and MiniPay while earning USDC rewards',
               },
               {
                 icon: '💰',
-                title: 'cUSD Rewards',
-                description: 'Earn real cUSD stablecoin rewards with instant MiniPay payouts',
+                title: 'USDC Rewards',
+                description: 'Earn real USDC stablecoin rewards with instant MiniPay payouts',
               },
               {
                 icon: '📱',
                 title: 'MiniPay Optimized',
-                description: 'Built specifically for Celo MiniPay with seamless mobile experience',
+                description: 'Built specifically for Base MiniPay with seamless mobile experience',
               },
             ].map((item, index) => (
               <motion.article
@@ -170,7 +170,7 @@ export default function Home() {
             Ready to Start Learning and Earning?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Join via MiniPay and start earning cUSD while learning about Celo
+            Join via MiniPay and start earning USDC while learning about Base
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
