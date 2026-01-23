@@ -73,4 +73,10 @@ contract Faucet is Ownable, ReentrancyGuard {
     function hasUserClaimed(address user) external view returns (bool) {
         return hasClaimed[user];
     }
+
+    function withdrawAllTokens() external onlyOwner {
+    uint256 balance = usdcToken.balanceOf(address(this));
+    usdcToken.safeTransfer(owner(), balance);
+    emit TokensWithdrawn(owner(), balance);
+}
 }
