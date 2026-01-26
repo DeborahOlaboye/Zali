@@ -159,7 +159,9 @@ export const createGameSlice: StateCreator<
   loadGameSession: async (sessionId) => {
     set({ isLoading: true, error: null }, false, 'game/loadGameSession/pending');
     try {
-      // TODO: Implement actual session loading
+      // FEATURE: Load game session from API
+      // See GitHub Issue #148 for full implementation
+      // Required: Fetch active game session data and update state
       // const session = await api.getGameSession(sessionId);
       // set({ gameSession: session }, false, 'game/loadGameSession/fulfilled');
     } catch (error) {
