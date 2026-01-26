@@ -74,27 +74,26 @@ No staking. No long setup. Just **connect → play → earn**.
 
 ### 🕹 **Trivia Gameplay**
 
-* 10 random questions per game session
-* Multiple-choice questions
-* 5-minute time limit
-* Responsive UI with smooth animations
-* Questions selected via Chainlink VRF for fairness
+* Multiple-choice questions with 2-4 options
+* Owner-managed question addition
+* Configurable reward amounts per question
+* Question categories (Celo, DeFi, Web3, Crypto, NFTs, DAOs)
+* Difficulty levels (Easy, Medium, Hard)
+* Active/Inactive question management
 
 ### 🎁 **Reward Distribution**
 
 * **FREE to play** (no entry fee)
-* Earn **0.001 ETH per correct answer**
-* Earn **0.005 ETH bonus** for perfect score (10/10)
-* Earn up to **0.002 ETH speed bonus** for fast answers
-* **Max reward per game: 0.017 ETH**
-* Rewards distributed automatically via smart contract
+* Rewards are configurable per question
+* Token-based rewards (USDC on Base mainnet)
+* Direct distribution to players
+* Owner can manage reward amounts
 
-### 🏆 **Leaderboard**
+### 🏆 **User Scoring**
 
-* Track top 100 players by total score
-* Username registration system
-* Weekly reward distribution for top 10 players
-* Real-time rank updates
+* Track user scores for answered questions
+* Owner can manage questions and rewards
+* Simple scoring mechanism without complex leaderboards
 
 ### 📱 **Built for All Devices**
 
@@ -110,18 +109,17 @@ No staking. No long setup. Just **connect → play → earn**.
 ## High-Level Flow
 
 ```
-Web3 Wallet → Register Username → Start Game → Answer Questions → Submit Answers → Claim ETH Rewards
+Web3 Wallet → Connect → Play Questions → Submit Answers → Earn Rewards
 ```
 
 ## System Diagram
 
 ```
-+------------------+      +----------------------+     +----------------------+
-|  Frontend (Next) | <--> | TriviaGameV2.sol     | <-> | Chainlink VRF V2     |
-+------------------+      +----------------------+     +----------------------+
++------------------+      +----------------------+
+|  Frontend (Next) | <--> | SimpleTriviaGame.sol |
++------------------+      +----------------------+
          |                          |
-         |                          |
-         v                          v
+         |                          v
 +------------------+      +------------------+
 |  Faucet.sol      |      | USDC Token       |
 |  (Optional)      |      | (Base Mainnet)   |
@@ -195,9 +193,10 @@ Zali/
 
 # 🔐 **Smart Contracts**
 
-### **TriviaGameV2.sol** (Main Contract)
+### **SimpleTriviaGame** (Main Contract - Currently Deployed)
 
-Manages the complete trivia game with leaderboard, VRF randomness, and ETH rewards.
+Manages basic trivia gameplay with question management and user scoring.
+Direct token-based rewards without VRF randomness or leaderboard features.
 
 Key features:
 - Username registration system
