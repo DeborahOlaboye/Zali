@@ -74,27 +74,26 @@ No staking. No long setup. Just **connect → play → earn**.
 
 ### 🕹 **Trivia Gameplay**
 
-* 10 random questions per game session
-* Multiple-choice questions
-* 5-minute time limit
-* Responsive UI with smooth animations
-* Questions selected via Chainlink VRF for fairness
+* Multiple-choice questions with 2-4 options
+* Owner-managed question addition
+* Configurable reward amounts per question
+* Question categories (Celo, DeFi, Web3, Crypto, NFTs, DAOs)
+* Difficulty levels (Easy, Medium, Hard)
+* Active/Inactive question management
 
 ### 🎁 **Reward Distribution**
 
 * **FREE to play** (no entry fee)
-* Earn **0.001 ETH per correct answer**
-* Earn **0.005 ETH bonus** for perfect score (10/10)
-* Earn up to **0.002 ETH speed bonus** for fast answers
-* **Max reward per game: 0.017 ETH**
-* Rewards distributed automatically via smart contract
+* Rewards are configurable per question
+* Token-based rewards (USDC on Base mainnet)
+* Direct distribution to players
+* Owner can manage reward amounts
 
-### 🏆 **Leaderboard**
+### 🏆 **User Scoring**
 
-* Track top 100 players by total score
-* Username registration system
-* Weekly reward distribution for top 10 players
-* Real-time rank updates
+* Track user scores for answered questions
+* Owner can manage questions and rewards
+* Simple scoring mechanism without complex leaderboards
 
 ### 📱 **Built for All Devices**
 
@@ -110,18 +109,17 @@ No staking. No long setup. Just **connect → play → earn**.
 ## High-Level Flow
 
 ```
-Web3 Wallet → Register Username → Start Game → Answer Questions → Submit Answers → Claim ETH Rewards
+Web3 Wallet → Connect → Play Questions → Submit Answers → Earn Rewards
 ```
 
 ## System Diagram
 
 ```
-+------------------+      +----------------------+     +----------------------+
-|  Frontend (Next) | <--> | TriviaGameV2.sol     | <-> | Chainlink VRF V2     |
-+------------------+      +----------------------+     +----------------------+
++------------------+      +----------------------+
+|  Frontend (Next) | <--> | SimpleTriviaGame.sol |
++------------------+      +----------------------+
          |                          |
-         |                          |
-         v                          v
+         |                          v
 +------------------+      +------------------+
 |  Faucet.sol      |      | USDC Token       |
 |  (Optional)      |      | (Base Mainnet)   |
@@ -137,7 +135,6 @@ Web3 Wallet → Register Username → Start Game → Answer Questions → Submit
 * Solidity 0.8.20
 * Foundry (Forge)
 * OpenZeppelin Contracts
-* Chainlink VRF V2
 * Base Mainnet
 * USDC (ERC20)
 
@@ -157,7 +154,7 @@ Web3 Wallet → Register Username → Start Game → Answer Questions → Submit
 
 * On-chain only (no traditional backend)
 * Questions stored in smart contract
-* Chainlink VRF for randomness
+* Token rewards managed by contract
 
 ---
 
@@ -168,13 +165,11 @@ Zali/
   ├── contracts/               # Smart contracts (Foundry)
   │    ├── src/
   │    │    ├── Faucet.sol
-  │    │    ├── TriviaGame.sol
-  │    │    ├── TriviaGameV2.sol
+  │    │    ├── SimpleTriviaGame.sol
   │    │    └── MockVRF*.sol
   │    ├── script/            # Deployment scripts
-  │    │    ├── Deploy.s.sol
-  │    │    ├── DeployTriviaGameV2.s.sol
-  │    │    └── Add*Questions.s.sol
+  │    │    ├── DeploySimpleMainnet.s.sol
+  │    │    └── AddQuestions.s.sol
   │    ├── test/              # Contract tests
   │    └── foundry.toml       # Foundry config
   ├── frontend/
@@ -195,28 +190,32 @@ Zali/
 
 # 🔐 **Smart Contracts**
 
-### **TriviaGameV2.sol** (Main Contract)
+### **SimpleTriviaGame** (Main Contract - Currently Deployed)
 
-Manages the complete trivia game with leaderboard, VRF randomness, and ETH rewards.
+Manages basic trivia gameplay with question management and user scoring.
+Direct token-based rewards without VRF randomness or leaderboard features.
 
 Key features:
-- Username registration system
-- Chainlink VRF V2 for random question selection
-- On-chain question storage
-- Automatic ETH reward distribution
-- Leaderboard tracking (top 100 players)
-- Weekly reward pools for top players
-- Speed bonus calculations
+- Simple question and answer management
+- Token-based reward system
+- Owner-controlled question management
+- User score tracking
+- Category and difficulty organization
 
 Key functions:
 
 ```solidity
-function registerUsername(string memory _username) external;
-function startGame() external returns (uint256 sessionId);
-function submitAnswers(uint256 _sessionId, uint8[] calldata _answers) external;
-function claimRewards() external;
-function getLeaderboard(uint256 _count) external view returns (...);
-function addQuestion(...) external onlyOwner;
+function addQuestion(
+    string memory _questionText,
+    string[] memory _options,
+    uint256 _correctOption,
+    uint256 _rewardAmount,
+    Category _category,
+    Difficulty _difficulty
+) external onlyOwner;
+
+function deactivateQuestion(uint256 _questionId) external onlyOwner;
+function getQuestion(uint256 _questionId) external view returns (Question);
 ```
 
 ### **Faucet.sol** (Optional - Testnet Only)
@@ -264,10 +263,10 @@ npm install
 Create a `.env.local` file in `/frontend`:
 
 ```bash
-# Contract Addresses (update after deployment)
-NEXT_PUBLIC_TRIVIA_GAME_V2_ADDRESS=0x...
+# Contract Addresses
+NEXT_PUBLIC_SIMPLE_TRIVIA_GAME_ADDRESS=0x7409Cbcb6577164E96A9b474efD4C32B9e17d59d
 NEXT_PUBLIC_FAUCET_ADDRESS=0x... # Optional - testnet only
-NEXT_PUBLIC_MOCK_VRF_ADDRESS=0x... # Optional - for testing
+NEXT_PUBLIC_USDC_ADDRESS=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
 
 # Network Configuration
 NEXT_PUBLIC_RPC_URL=https://mainnet.base.org
@@ -299,48 +298,28 @@ forge test -vvv # Verbose output
 
 # 🚀 **Deploy Contracts**
 
-### Step 1: Set Up Chainlink VRF Subscription
-
-1. Visit https://vrf.chain.link
-2. Create a subscription on Base Mainnet
-3. Fund with LINK tokens
-4. Copy subscription ID
-5. Update `contracts/script/DeployTriviaGameV2.s.sol` with your subscription ID
-
-### Step 2: Deploy TriviaGameV2
+### Step 1: Deploy SimpleTriviaGame
 
 ```bash
 cd contracts
 
 # Deploy to Base Mainnet
-forge script script/DeployTriviaGameV2.s.sol:DeployTriviaGameV2 \
+forge script script/DeploySimpTriviaGame.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast --verify \
   --etherscan-api-key $BASESCAN_API_KEY
 
 # Or deploy to Base Sepolia (testnet)
-forge script script/DeployTriviaGameV2.s.sol:DeployTriviaGameV2 \
+forge script script/DeploySimpleTriviaGame.s.sol \
   --rpc-url https://sepolia.base.org \
   --broadcast --verify \
   --etherscan-api-key $BASESCAN_API_KEY
 ```
 
-### Step 3: Add Contract as VRF Consumer
-
-Go to https://vrf.chain.link and add your deployed contract address as a consumer.
-
-### Step 4: Fund Contract with ETH
+### Step 2: Add Questions
 
 ```bash
-cast send YOUR_CONTRACT_ADDRESS --value 0.5ether \
-  --rpc-url https://mainnet.base.org \
-  --private-key $PRIVATE_KEY
-```
-
-### Step 5: Add Questions
-
-```bash
-forge script script/AddBasicQuestions.s.sol \
+forge script script/AddQuestions.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast
 ```
@@ -379,15 +358,11 @@ Add environment variables on Vercel.
 
 The contracts emit events for tracking game progress:
 
-### TriviaGameV2 Events
+### SimpleTriviaGame Events
 
 ```solidity
-event PlayerRegistered(address indexed player, string username);
-event GameStarted(address indexed player, uint256 sessionId, uint256 requestId);
-event QuestionsAssigned(address indexed player, uint256 sessionId, uint256[] questionIds);
-event GameCompleted(address indexed player, uint256 sessionId, uint256 score, uint8 correctCount, uint256 reward);
-event RewardClaimed(address indexed player, uint256 amount);
-event LeaderboardUpdated(address indexed player, uint256 newRank, uint256 totalScore);
+event QuestionAdded(uint256 indexed questionId, string questionText, uint256 reward);
+event AnswerSubmitted(address indexed user, uint256 questionId, bool isCorrect, uint256 reward);
 ```
 
 ---
@@ -396,43 +371,23 @@ event LeaderboardUpdated(address indexed player, uint256 newRank, uint256 totalS
 
 ### 1. User connects Web3 wallet
 
-ETH balance fetched in real time.
+Wallet connection via Web3 provider (MetaMask, Coinbase Wallet, etc.)
 
-### 2. User registers username
+### 2. User views available questions
 
-One-time registration, stored on-chain.
+Browse questions added by contract owner
 
-### 3. User starts game
+### 3. User selects and answers question
 
-Transaction triggers Chainlink VRF request for random questions.
+Submit answer to the smart contract
 
-### 4. VRF assigns random questions
+### 4. Smart contract verifies answer
 
-Chainlink VRF callback selects 10 random questions from contract storage.
+Checks if answer is correct against stored data
 
-### 5. User plays trivia
+### 5. User receives reward
 
-10 multiple-choice questions with 5-minute time limit.
-
-### 6. User submits answers
-
-Smart contract calculates:
-- Correct answer count
-- Speed bonus (faster = more bonus)
-- Total score
-- ETH reward amount
-
-### 7. Leaderboard updates
-
-Player's rank updates automatically based on total score.
-
-### 8. User claims rewards
-
-ETH rewards transferred instantly to player's wallet.
-
-### 9. Weekly rewards (optional)
-
-Top 10 players share weekly reward pool.
+If correct, reward tokens transferred to user's wallet
 
 ---
 
@@ -440,44 +395,34 @@ Top 10 players share weekly reward pool.
 
 * Responsive design (mobile & desktop)
 * Smooth animations with Framer Motion
-* Question timer with visual countdown
 * Progress tracking
 * Real-time balance updates
 * Toast notifications for transactions
 * Error boundaries for graceful error handling
 * Loading states and skeleton screens
 * Gradient themes
-* Interactive leaderboard
 * Wallet connection modal (AppKit)
 
 ---
 
-# 📈 **Leaderboard System**
+# 📈 **User Scoring System**
 
-On-chain leaderboard tracking:
+SimpleTriviaGame maintains user scores:
 
-* **Top 100 players** by total score
-* Player username
-* Total score (includes correct answers + speed bonuses)
-* Games played
-* Best score in a single session
-* Accuracy percentage
-* Real-time rank updates
-
-Weekly rewards:
-* Top 10 players share weekly reward pool
-* Distribution: 40%, 25%, 15%, 10%, 5%, 2.5%, 1%, 0.5%, 0.5%, 0.5%
+* User scores tracked in contract storage
+* Incrementing scores for each correct answer
+* Owner controls reward amounts per question
+* No automatic leaderboard (can be added in future versions)
 
 ---
 
 ## 🔒 **Smart Contract Security**
 
-- Reentrancy protection with OpenZeppelin's `ReentrancyGuard`
-- Access control with `Ownable`
+- Access control with `Ownable` (only owner can add questions)
 - Input validation for all user-provided data
-- Secure random number generation using Chainlink VRF
-- Emergency withdrawal functions for admin
-- Comprehensive test coverage
+- Safe ERC20 token transfers using OpenZeppelin's `SafeERC20`
+- Error handling for invalid inputs
+- Comprehensive test coverage (see contracts/test/)
 
 ## 🔐 **Input Sanitization**
 
@@ -561,14 +506,14 @@ Your demo video should include:
 # 🏆 **Why This Project Stands Out**
 
 * **Built on Base**: Fast, cheap L2 transactions
-* **Chainlink VRF Integration**: Provably fair randomness
-* **Real ETH rewards**: Instant payouts on-chain
+* **Real USDC rewards**: Instant payouts on-chain
 * **No entry fees**: Free to play, earn based on performance
-* **Comprehensive leaderboard**: Competitive gameplay with weekly rewards
+* **Simple & efficient**: Minimal contract footprint
 * **Production-ready**: Full error handling, state management, and testing
 * **Fully on-chain**: No backend dependencies
 * **Modern Web3 stack**: Wagmi, Viem, AppKit for seamless wallet integration
 * **Clean architecture**: Well-documented and maintainable code
+* **Future upgrade path**: Can be extended with VRF, leaderboards, or other features
 
 ---
 
