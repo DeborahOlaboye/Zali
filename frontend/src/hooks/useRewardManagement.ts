@@ -213,6 +213,7 @@ export function useRewards() {
   return {
     ...queries,
     ...mutations,
-    unclaimedSessions: [], // TODO: Implement unclaimed sessions logic
+    // FEATURE: Query unclaimed game sessions - See GitHub Issue #150
+    unclaimedSessions: [],
   };
 }
