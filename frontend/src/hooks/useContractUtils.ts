@@ -52,7 +52,7 @@ export function useContractUtils() {
 
       // Notify user if enabled
       if (showNotifications) {
-        // TODO: Uncomment and integrate with your notification system
+        // Notification system integration pending
         // toast.error(enhancedError.message, {
         //   errorId: `contract-utils-${Date.now()}`,
         //   autoClose: 5000,

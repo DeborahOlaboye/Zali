@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useAccount, useChainId } from 'wagmi';
 import { CONTRACTS } from '@/config/contracts';
-import { Address } from 'viem';
+import { Address, type Chain } from 'viem';
 import { useContractErrorHandling } from './useContractErrorHandling';
 import { useContractRead } from './useContractRead';
 import { useContractWrite } from './useContractWrite';
@@ -76,7 +76,7 @@ interface EnhancedContractReturn {
   isSupportedChain: boolean;
   address: `0x${string}` | undefined;
   chainId: number;
-  chain: any; // TODO: Import proper chain type from wagmi
+  chain: Chain | undefined;
 
   // Helpers
   getContractInfo: (contractName: keyof typeof CONTRACTS) => { address: Address; abi: any };
@@ -291,7 +291,7 @@ export function useEnhancedContract(): EnhancedContractReturn {
     isSupportedChain,
     address: address as `0x${string}` | undefined,
     chainId,
-    chain: undefined, // TODO: Get from public client if needed
+    chain: undefined as Chain | undefined
 
     // Helpers
     getContractInfo,

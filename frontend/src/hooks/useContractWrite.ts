@@ -82,7 +82,7 @@ export function useContractWrite() {
 
       // Notify user if enabled
       if (showNotifications) {
-        // TODO: Uncomment and integrate with your notification system
+        // Notification system integration pending
         // toast.error(enhancedError.message, {
         //   errorId: `contract-write-${txHash || Date.now()}`,
         //   autoClose: 10000, // Longer timeout for write operations
@@ -206,7 +206,7 @@ export function useContractWrite() {
 
       // Show success notification if enabled
       if (showNotifications) {
-        // TODO: Uncomment and integrate with your notification system
+        // Notification system integration pending
         // toast.success('Transaction confirmed!', {
         //   autoClose: 5000,
         //   txHash: hash,

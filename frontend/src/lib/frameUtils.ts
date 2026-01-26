@@ -37,7 +37,9 @@ export async function validateFrameMessage(
       };
     }
 
-    // TODO: Implement actual signature verification
+    // SECURITY: Implement actual signature verification
+    // See GitHub Issue #149 for full implementation
+    // Required: Validate Farcaster frame signatures using hub-nodejs
     // const hubClient = getHubClient();
     // const result = await hubClient.validateMessage(trustedData);
 
