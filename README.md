@@ -374,43 +374,23 @@ event AnswerSubmitted(address indexed user, uint256 questionId, bool isCorrect, 
 
 ### 1. User connects Web3 wallet
 
-ETH balance fetched in real time.
+Wallet connection via Web3 provider (MetaMask, Coinbase Wallet, etc.)
 
-### 2. User registers username
+### 2. User views available questions
 
-One-time registration, stored on-chain.
+Browse questions added by contract owner
 
-### 3. User starts game
+### 3. User selects and answers question
 
-Transaction triggers Chainlink VRF request for random questions.
+Submit answer to the smart contract
 
-### 4. VRF assigns random questions
+### 4. Smart contract verifies answer
 
-Chainlink VRF callback selects 10 random questions from contract storage.
+Checks if answer is correct against stored data
 
-### 5. User plays trivia
+### 5. User receives reward
 
-10 multiple-choice questions with 5-minute time limit.
-
-### 6. User submits answers
-
-Smart contract calculates:
-- Correct answer count
-- Speed bonus (faster = more bonus)
-- Total score
-- ETH reward amount
-
-### 7. Leaderboard updates
-
-Player's rank updates automatically based on total score.
-
-### 8. User claims rewards
-
-ETH rewards transferred instantly to player's wallet.
-
-### 9. Weekly rewards (optional)
-
-Top 10 players share weekly reward pool.
+If correct, reward tokens transferred to user's wallet
 
 ---
 
@@ -418,44 +398,34 @@ Top 10 players share weekly reward pool.
 
 * Responsive design (mobile & desktop)
 * Smooth animations with Framer Motion
-* Question timer with visual countdown
 * Progress tracking
 * Real-time balance updates
 * Toast notifications for transactions
 * Error boundaries for graceful error handling
 * Loading states and skeleton screens
 * Gradient themes
-* Interactive leaderboard
 * Wallet connection modal (AppKit)
 
 ---
 
-# 📈 **Leaderboard System**
+# 📈 **User Scoring System**
 
-On-chain leaderboard tracking:
+SimpleTriviaGame maintains user scores:
 
-* **Top 100 players** by total score
-* Player username
-* Total score (includes correct answers + speed bonuses)
-* Games played
-* Best score in a single session
-* Accuracy percentage
-* Real-time rank updates
-
-Weekly rewards:
-* Top 10 players share weekly reward pool
-* Distribution: 40%, 25%, 15%, 10%, 5%, 2.5%, 1%, 0.5%, 0.5%, 0.5%
+* User scores tracked in contract storage
+* Incrementing scores for each correct answer
+* Owner controls reward amounts per question
+* No automatic leaderboard (can be added in future versions)
 
 ---
 
 ## 🔒 **Smart Contract Security**
 
-- Reentrancy protection with OpenZeppelin's `ReentrancyGuard`
-- Access control with `Ownable`
+- Access control with `Ownable` (only owner can add questions)
 - Input validation for all user-provided data
-- Secure random number generation using Chainlink VRF
-- Emergency withdrawal functions for admin
-- Comprehensive test coverage
+- Safe ERC20 token transfers using OpenZeppelin's `SafeERC20`
+- Error handling for invalid inputs
+- Comprehensive test coverage (see contracts/test/)
 
 ## 🔐 **Input Sanitization**
 
