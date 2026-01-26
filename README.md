@@ -509,14 +509,14 @@ Your demo video should include:
 # 🏆 **Why This Project Stands Out**
 
 * **Built on Base**: Fast, cheap L2 transactions
-* **Chainlink VRF Integration**: Provably fair randomness
-* **Real ETH rewards**: Instant payouts on-chain
+* **Real USDC rewards**: Instant payouts on-chain
 * **No entry fees**: Free to play, earn based on performance
-* **Comprehensive leaderboard**: Competitive gameplay with weekly rewards
+* **Simple & efficient**: Minimal contract footprint
 * **Production-ready**: Full error handling, state management, and testing
 * **Fully on-chain**: No backend dependencies
 * **Modern Web3 stack**: Wagmi, Viem, AppKit for seamless wallet integration
 * **Clean architecture**: Well-documented and maintainable code
+* **Future upgrade path**: Can be extended with VRF, leaderboards, or other features
 
 ---
 
