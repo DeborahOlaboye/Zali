@@ -135,7 +135,6 @@ Web3 Wallet → Connect → Play Questions → Submit Answers → Earn Rewards
 * Solidity 0.8.20
 * Foundry (Forge)
 * OpenZeppelin Contracts
-* Chainlink VRF V2
 * Base Mainnet
 * USDC (ERC20)
 
@@ -155,7 +154,7 @@ Web3 Wallet → Connect → Play Questions → Submit Answers → Earn Rewards
 
 * On-chain only (no traditional backend)
 * Questions stored in smart contract
-* Chainlink VRF for randomness
+* Token rewards managed by contract
 
 ---
 
@@ -166,13 +165,11 @@ Zali/
   ├── contracts/               # Smart contracts (Foundry)
   │    ├── src/
   │    │    ├── Faucet.sol
-  │    │    ├── TriviaGame.sol
-  │    │    ├── TriviaGameV2.sol
+  │    │    ├── SimpleTriviaGame.sol
   │    │    └── MockVRF*.sol
   │    ├── script/            # Deployment scripts
-  │    │    ├── Deploy.s.sol
-  │    │    ├── DeployTriviaGameV2.s.sol
-  │    │    └── Add*Questions.s.sol
+  │    │    ├── DeploySimpleMainnet.s.sol
+  │    │    └── AddQuestions.s.sol
   │    ├── test/              # Contract tests
   │    └── foundry.toml       # Foundry config
   ├── frontend/
