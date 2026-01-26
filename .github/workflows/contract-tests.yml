@@ -1,0 +1,44 @@
+name: Contract Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'contracts/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'contracts/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./contracts
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run forge build
+        run: forge build
+        continue-on-error: false
+
+      - name: Run forge tests
+        run: forge test -v
+        continue-on-error: false
+
+      - name: Run gas snapshot
+        run: forge snapshot
+        continue-on-error: true
+
+      - name: Check contract sizes
+        run: forge build --sizes
+        continue-on-error: true
