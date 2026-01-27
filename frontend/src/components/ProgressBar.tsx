@@ -2,12 +2,36 @@
 
 import { motion } from 'framer-motion';
 
+/**
+ * ProgressBar displays a progress indicator with animated fill
+ * 
+ * Shows progress from 0-100% with optional percentage label.
+ * Supports multiple color variants and sizes for different contexts.
+ * 
+ * @component
+ * @example
+ * <ProgressBar progress={65} showPercentage label="Loading" />
+ * 
+ * @example
+ * <ProgressBar progress={80} color="success" size="lg" />
+ */
 interface ProgressBarProps {
+  /** Progress value from 0 to 100 */
   progress: number;
+  
+  /** Whether to show percentage text. Default: false */
   showPercentage?: boolean;
+  
+  /** Color variant of the progress bar. Default: 'primary' */
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+  
+  /** Size of the progress bar. Default: 'md' */
   size?: 'sm' | 'md' | 'lg';
+  
+  /** Additional CSS classes for the container */
   className?: string;
+  
+  /** Optional label to display above the progress bar */
   label?: string;
 }
 
