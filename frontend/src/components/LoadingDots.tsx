@@ -2,9 +2,27 @@
 
 import { motion } from 'framer-motion';
 
+/**
+ * LoadingDots displays animated bouncing dots for loading states
+ * 
+ * Lightweight alternative to spinner with smooth staggered animation.
+ * Ideal for inline loading indicators within text or inline contexts.
+ * 
+ * @component
+ * @example
+ * <LoadingDots size="md" />
+ * 
+ * @example
+ * <p>Loading data<LoadingDots size="sm" color="primary" /></p>
+ */
 interface LoadingDotsProps {
+  /** Size of each dot. Default: 'md' */
   size?: 'sm' | 'md' | 'lg';
+  
+  /** Color of the dots. Default: 'primary' (blue) */
   color?: 'primary' | 'secondary' | 'white' | 'gray';
+  
+  /** Additional CSS classes for the container */
   className?: string;
 }
 
