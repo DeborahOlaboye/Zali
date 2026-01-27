@@ -6,9 +6,32 @@ import { QuestionCardProps } from '@/types/components';
 import type { Question } from '@/data/questions';
 import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics';
 
+/**
+ * QuestionCard displays a trivia question with multiple choice options
+ * 
+ * Core component for the trivia game. Handles question display, answer selection,
+ * animation, and analytics tracking. Supports difficulty levels, categories, and
+ * animated option display.
+ * 
+ * @component
+ * @example
+ * <QuestionCard 
+ *   question={question}
+ *   questionNumber={1}
+ *   totalQuestions={10}
+ *   onAnswer={handleAnswer}
+ * />
+ * 
+ * @see Question type in @/data/questions
+ * @see QuestionCardProps type in @/types/components
+ */
 type OptionLabel = 'A' | 'B' | 'C' | 'D';
 
+/**
+ * Extended props for QuestionCard with additional control options
+ */
 interface ExtendedQuestionCardProps extends QuestionCardProps {
+  /** Whether the component is disabled (user cannot select answers) */
   disabled?: boolean;
 }
 
