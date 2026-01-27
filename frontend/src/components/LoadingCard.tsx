@@ -3,12 +3,40 @@
 import { motion } from 'framer-motion';
 import { LoadingSpinner } from './LoadingSpinner';
 
+/**
+ * LoadingCard displays a centered card with loading indicator and optional messages
+ * 
+ * Provides a complete loading experience with spinner, title, message, and progress.
+ * Often used as a full-screen or modal loading state.
+ * 
+ * @component
+ * @example
+ * <LoadingCard title="Processing" message="Please wait..." />
+ * 
+ * @example
+ * <LoadingCard 
+ *   title="Uploading" 
+ *   message="Your file is being uploaded" 
+ *   progress={45}
+ * />
+ */
 interface LoadingCardProps {
+  /** Title text displayed above the spinner */
   title?: string;
+  
+  /** Message text displayed below the title */
   message?: string;
+  
+  /** Progress percentage (0-100) to display a progress bar */
   progress?: number;
+  
+  /** Whether to show the loading spinner. Default: true */
   showSpinner?: boolean;
+  
+  /** Additional CSS classes to apply to the card container */
   className?: string;
+  
+  /** Child elements to render inside the card */
   children?: React.ReactNode;
 }
 
