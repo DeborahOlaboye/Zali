@@ -9,6 +9,16 @@ import { NavbarProps, NavLinkProps } from '@/types/components';
 import { Address } from '@/types/web3';
 import { WalletErrorBoundary } from '@/components/WalletErrorBoundary';
 
+/**
+ * Navbar component for site navigation and wallet connection
+ * 
+ * Main navigation bar with responsive mobile menu, wallet connection,
+ * and user account menu. Features adaptive layout for mobile/desktop.
+ * 
+ * @component
+ * @example
+ * <Navbar />
+ */
 interface AppKitInstance {
   open: () => void;
 }
