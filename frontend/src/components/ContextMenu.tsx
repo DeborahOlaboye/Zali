@@ -1,11 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+/**
+ * ContextMenu item configuration
+ */
 export interface ContextMenuItem {
+  /** Unique identifier for the menu item */
   id: string;
+  
+  /** Display label */
   label: string;
+  
+  /** Optional icon element */
   icon?: React.ReactNode;
+  
+  /** Whether this item is disabled */
   disabled?: boolean;
+  
+  /** Whether to show a visual divider */
   divider?: boolean;
+  
+  /** Nested submenu items */
   children?: ContextMenuItem[];
 }
 

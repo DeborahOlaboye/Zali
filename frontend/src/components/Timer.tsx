@@ -4,8 +4,29 @@ import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { TimerProps } from '@/types/components';
 
+/**
+ * Timer displays a countdown timer with visual progress indication
+ * 
+ * Shows remaining time and changes color as time runs out (green → yellow → red).
+ * Supports pause/resume functionality and completion callback.
+ * 
+ * @component
+ * @example
+ * <Timer duration={30} onTimeUp={handleTimeUp} />
+ * 
+ * @example
+ * <Timer 
+ *   duration={60} 
+ *   onTimeUp={() => submitAnswer()} 
+ *   isPaused={isPaused}
+ *   autoStart={true}
+ * />
+ */
 interface ExtendedTimerProps extends TimerProps {
+  /** Whether the timer is paused. Default: false */
   isPaused?: boolean;
+  
+  /** Whether to auto-start the timer. Default: true */
   autoStart?: boolean;
 }
 

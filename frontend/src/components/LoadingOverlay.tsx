@@ -3,11 +3,38 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoadingSpinner } from './LoadingSpinner';
 
+/**
+ * LoadingOverlay displays a full-screen or modal loading overlay
+ * 
+ * Blocks user interaction during critical loading operations.
+ * Can show optional backdrop, spinner, message, and progress indicator.
+ * 
+ * @component
+ * @example
+ * <LoadingOverlay isVisible={isLoading} message="Processing..." />
+ * 
+ * @example
+ * <LoadingOverlay 
+ *   isVisible={isLoading}
+ *   message="Uploading"
+ *   progress={progress}
+ *   backdrop={true}
+ * />
+ */
 interface LoadingOverlayProps {
+  /** Whether to show the overlay. When false, overlay is hidden */
   isVisible: boolean;
+  
+  /** Optional message to display in the overlay */
   message?: string;
+  
+  /** Progress percentage (0-100) to show progress bar */
   progress?: number;
+  
+  /** Whether to show semi-transparent backdrop. Default: true */
   backdrop?: boolean;
+  
+  /** Size of the spinner. Default: 'lg' */
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 

@@ -1,12 +1,39 @@
 import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
 
+/**
+ * RewardCard displays a reward or achievement card with icon and details
+ * 
+ * Used to showcase rewards, achievements, or stats with optional action button.
+ * Features hover animations and color customization.
+ * 
+ * @component
+ * @example
+ * <RewardCard 
+ *   icon={<StarIcon />}
+ *   title="Perfect Score"
+ *   amount="+100 pts"
+ *   description="Answered all questions correctly"
+ *   color="text-yellow-500"
+ * />
+ */
 interface RewardCardProps {
+  /** Icon or element to display (usually an emoji or icon component) */
   icon: ReactNode;
+  
+  /** Card title */
   title: string;
+  
+  /** Amount or value to display (e.g., '+100 pts', '10 USDC') */
   amount: string;
+  
+  /** Description text for the card */
   description: string;
+  
+  /** CSS color class for the icon (e.g., 'text-yellow-500', 'text-blue-600') */
   color: string;
+  
+  /** Optional action element (button, link, etc.) */
   action?: ReactNode;
 }
 

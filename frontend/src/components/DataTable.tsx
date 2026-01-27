@@ -1,17 +1,53 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
+/**
+ * Column configuration for DataTable
+ * 
+ * Defines how to render and interact with each column in the table.
+ * @template T - The data type for the table rows
+ */
 export interface Column<T = any> {
+  /** Key of the data property to display */
   key: keyof T;
+  
+  /** Display label for the column header */
   label: string;
+  
+  /** Whether this column is sortable. Default: false */
   sortable?: boolean;
+  
+  /** Custom render function for cell content */
   render?: (value: any, row: T) => React.ReactNode;
 }
 
+/**
+ * DataTable displays tabular data with sorting and pagination
+ * 
+ * Flexible table component supporting custom column configuration,
+ * sorting, and optional pagination. Good for displaying lists and reports.
+ * 
+ * @component
+ * @template T - The data type for rows
+ * @example
+ * <DataTable 
+ *   columns={columns}
+ *   data={data}
+ *   pagination
+ *   pageSize={10}
+ * />
+ */
 export interface DataTableProps<T = any> {
+  /** Column configurations */
   columns: Column<T>[];
+  
+  /** Table data rows */
   data: T[];
+  
+  /** Whether to show pagination controls. Default: false */
   pagination?: boolean;
+  
+  /** Number of rows per page */
   pageSize?: number;
   className?: string;
 }

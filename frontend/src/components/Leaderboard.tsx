@@ -1,16 +1,41 @@
 import { motion } from 'framer-motion';
 import { TrophyIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
+/**
+ * Leaderboard component displays ranked player statistics
+ * 
+ * Shows top players with their rankings and total scores.
+ * Highlights current user if provided. Responsive and animated.
+ * 
+ * @component
+ * @example
+ * <Leaderboard 
+ *   data={topPlayers}
+ *   currentUserAddress={userAddress}
+ * />
+ */
 type LeaderboardEntry = {
+  /** Wallet address of the player */
   address: string;
+  
+  /** Display name of the player */
   username: string;
+  
+  /** Total accumulated score */
   totalScore: number;
+  
+  /** Player's rank/position */
   rank: number;
 };
 
 type LeaderboardProps = {
+  /** Array of leaderboard entries sorted by rank */
   data: LeaderboardEntry[];
+  
+  /** Current user's wallet address - used to highlight their row */
   currentUserAddress?: string;
+  
+  /** Additional CSS classes */
   className?: string;
 };
 

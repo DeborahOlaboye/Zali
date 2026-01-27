@@ -10,6 +10,20 @@ import {
 import { ReactNode, useEffect } from 'react';
 import { WalletErrorType } from '@/utils/walletErrors';
 
+/**
+ * ErrorDisplay shows user-friendly error, warning, info, or success messages
+ * 
+ * Displays messages with appropriate icons and styling. Supports
+ * auto-dismiss, retry actions, and custom content.
+ * 
+ * @component
+ * @example
+ * <ErrorDisplay 
+ *   variant="error"
+ *   title="Transaction Failed"
+ *   message="Please try again"
+ * />
+ */
 type ErrorVariant = 'error' | 'warning' | 'info' | 'success';
 
 type ErrorDisplayProps = {

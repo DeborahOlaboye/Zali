@@ -3,14 +3,54 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics';
 
+/**
+ * ErrorBoundary catches JavaScript errors anywhere in the child component tree
+ * 
+ * Provides graceful error handling with customizable fallback UI, logging,
+ * and recovery mechanisms. Supports different error boundary levels.
+ * 
+ * @component
+ * @example
+ * <ErrorBoundary level="page" name="HomePage">
+ *   <Home />
+ * </ErrorBoundary>
+ * 
+ * @example
+ * // With custom fallback
+ * <ErrorBoundary 
+ *   fallback={(error, info, reset) => (
+ *     <div>
+ *       <p>Something went wrong: {error.message}</p>
+ *       <button onClick={reset}>Try again</button>
+ *     </div>
+ *   )}
+ * >
+ *   <Content />
+ * </ErrorBoundary>
+ */
 interface ErrorBoundaryProps {
+  /** Child components to protect with error boundary */
   children: ReactNode;
+  
+  /** Custom fallback UI to display on error. Receives error, errorInfo, and reset function */
   fallback?: (error: Error, errorInfo: ErrorInfo, reset: () => void) => ReactNode;
+  
+  /** Callback when an error is caught. Receives error and errorInfo */
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  
+  /** Level of error boundary: 'page' | 'section' | 'component'. Affects recovery strategy */
   level?: 'page' | 'section' | 'component';
+  
+  /** Name of this error boundary for debugging/logging purposes */
   name?: string;
+  
+  /** Whether to log errors to console and analytics. Default: true */
   enableLogging?: boolean;
+  
+  /** Whether to show error details in development. Default: true */
   showDetails?: boolean;
+  
+  /** Whether to attempt automatic recovery after an error. Default: true */
   enableAutoRecovery?: boolean;
 }
 

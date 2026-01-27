@@ -1,12 +1,30 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+/**
+ * InfiniteScroll component configuration
+ * 
+ * @template T - The type of items being loaded
+ */
 export interface InfiniteScrollProps<T> {
+  /** Current items loaded */
   items: T[];
+  
+  /** Whether more items are available to load */
   hasMore: boolean;
+  
+  /** Callback to load more items when scrolling near bottom */
   loadMore: () => void | Promise<void>;
+  
+  /** Function to render each item */
   renderItem: (item: T, index: number) => React.ReactNode;
+  
+  /** Component to show while loading more items */
   loadingComponent?: React.ReactNode;
+  
+  /** Message to show when all items are loaded */
   endMessage?: React.ReactNode;
+  
+  /** Distance from bottom (in pixels) to trigger load. Default: 100 */
   threshold?: number;
   className?: string;
   loaderClassName?: string;

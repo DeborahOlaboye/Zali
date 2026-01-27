@@ -2,11 +2,39 @@
 
 import { motion } from 'framer-motion';
 
+/**
+ * LoadingSpinner displays an animated rotating spinner for async operations
+ * 
+ * Used to provide visual feedback during loading states with optional progress tracking
+ * and status messages. Supports multiple sizes and color variants.
+ * 
+ * @component
+ * @example
+ * // Basic spinner
+ * <LoadingSpinner />
+ * 
+ * @example
+ * // Large spinner with message
+ * <LoadingSpinner size="lg" message="Loading game..." />
+ * 
+ * @example
+ * // With progress tracking
+ * <LoadingSpinner progress={65} message="65% complete" />
+ */
 interface LoadingSpinnerProps {
+  /** Size of the spinner: 'sm' (16px) | 'md' (24px) | 'lg' (32px) | 'xl' (48px). Default: 'md' */
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  
+  /** Color variant of the spinner. Default: 'primary' (blue) */
   color?: 'primary' | 'secondary' | 'white' | 'gray';
+  
+  /** Optional loading message displayed below the spinner */
   message?: string;
+  
+  /** Progress percentage (0-100) - displays a progress bar below spinner when provided */
   progress?: number;
+  
+  /** Additional CSS classes to apply to the container */
   className?: string;
 }
 
@@ -31,6 +59,8 @@ export function LoadingSpinner({
   progress,
   className = '',
 }: LoadingSpinnerProps) {
+  // Spinner animation - continuous rotation
+  // Uses 'linear' easing for smooth continuous rotation
   return (
     <div className={`flex flex-col items-center justify-center ${className}`} role="status" aria-live="polite">
       <motion.div

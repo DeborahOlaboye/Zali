@@ -1,12 +1,35 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 
+/**
+ * MultiSelect option configuration
+ */
 export interface MultiSelectOption {
+  /** Unique value for the option */
   value: string;
+  
+  /** Display label for the option */
   label: string;
+  
+  /** Whether this option is disabled */
   disabled?: boolean;
 }
 
+/**
+ * MultiSelect component for selecting multiple options
+ * 
+ * Dropdown with checkbox-style multiple selection.
+ * Supports searchable options, custom formatting, and disabled states.
+ * 
+ * @component
+ * @example
+ * <MultiSelect 
+ *   options={options}
+ *   value={selected}
+ *   onChange={setSelected}
+ *   placeholder="Select items..."
+ * />
+ */
 export interface MultiSelectProps {
   options: MultiSelectOption[];
   value: string[];

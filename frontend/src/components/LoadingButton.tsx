@@ -5,8 +5,31 @@ import { motion } from 'framer-motion';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ButtonProps, ButtonVariant, ButtonSize } from '@/types/components';
 
+/**
+ * LoadingButton is a button component with built-in loading state handling
+ * 
+ * Displays a spinner and optional loading text while in loading state.
+ * Disables user interaction and shows visual feedback during async operations.
+ * 
+ * @component
+ * @example
+ * // Basic button with loading state
+ * const [isLoading, setIsLoading] = useState(false);
+ * <LoadingButton isLoading={isLoading} onClick={handleClick}>
+ *   Submit
+ * </LoadingButton>
+ * 
+ * @example
+ * // With custom loading text
+ * <LoadingButton isLoading={isLoading} loadingText="Submitting...">
+ *   Submit Form
+ * </LoadingButton>
+ */
 interface LoadingButtonProps extends ButtonProps {
+  /** Whether the button is in loading state. Shows spinner and disables button */
   isLoading?: boolean;
+  
+  /** Text to display while loading (replaces children). If not provided, uses children */
   loadingText?: string;
 }
 
