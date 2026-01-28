@@ -7,6 +7,7 @@ import { AppKitProvider } from '../components/AppKitProvider';
 import { ReactNode, useEffect } from 'react';
 import { WalletErrorBoundary } from '@/components/WalletErrorBoundary';
 import { initAnalytics } from '@/lib/analytics';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,15 +25,17 @@ function ProvidersInner({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <WalletErrorBoundary>
-          <AppKitProvider>
-            {children}
-          </AppKitProvider>
-        </WalletErrorBoundary>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <WalletErrorBoundary>
+            <AppKitProvider>
+              {children}
+            </AppKitProvider>
+          </WalletErrorBoundary>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 }
 
