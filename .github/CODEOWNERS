@@ -1,0 +1,47 @@
+# CODEOWNERS
+# This file defines individuals or teams responsible for code in this repository.
+# Code owners are automatically requested for review when someone opens a pull request
+# that modifies code that they own.
+
+# Global owners - will be requested for review on all PRs
+* @DeborahOlaboye
+
+# Frontend code
+/frontend/ @DeborahOlaboye
+/frontend/src/components/ @DeborahOlaboye
+/frontend/src/app/ @DeborahOlaboye
+/frontend/src/contexts/ @DeborahOlaboye
+/frontend/src/hooks/ @DeborahOlaboye
+
+# Smart contracts
+/contracts/ @DeborahOlaboye
+/contracts/src/ @DeborahOlaboye
+/contracts/test/ @DeborahOlaboye
+/contracts/script/ @DeborahOlaboye
+
+# CI/CD and GitHub workflows
+/.github/ @DeborahOlaboye
+/.github/workflows/ @DeborahOlaboye
+
+# Documentation
+*.md @DeborahOlaboye
+/docs/ @DeborahOlaboye
+
+# Configuration files
+*.json @DeborahOlaboye
+*.yml @DeborahOlaboye
+*.yaml @DeborahOlaboye
+*.toml @DeborahOlaboye
+
+# Dependencies and package management
+package.json @DeborahOlaboye
+package-lock.json @DeborahOlaboye
+foundry.toml @DeborahOlaboye
+
+# Environment and deployment
+.env.example @DeborahOlaboye
+.env*.example @DeborahOlaboye
+Dockerfile @DeborahOlaboye
+docker-compose.yml @DeborahOlaboye
+netlify.toml @DeborahOlaboye
+vercel.json @DeborahOlaboye

@@ -1,0 +1,58 @@
+# Auto-labeler configuration for PRs
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**/*'
+
+contracts:
+  - changed-files:
+    - any-glob-to-any-file: 'contracts/**/*'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - '**/*.spec.ts'
+      - '**/*.spec.tsx'
+      - '**/test/**/*'
+      - '**/tests/**/*'
+      - '**/__tests__/**/*'
+
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/**/*'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+      - '**/package.json'
+      - '**/package-lock.json'
+      - 'foundry.toml'
+
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.config.js'
+      - '**/*.config.ts'
+      - '**/tsconfig.json'
+      - '**/.env.example'
+
+bug:
+  - title: '/^(fix|bugfix|hotfix):/i'
+
+enhancement:
+  - title: '/^feat:/i'
+
+breaking-change:
+  - body: '/BREAKING CHANGE/i'

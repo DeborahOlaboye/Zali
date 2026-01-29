@@ -1,0 +1,124 @@
+name: Contracts CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/contracts-ci.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/contracts-ci.yml'
+
+jobs:
+  test:
+    name: Foundry Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: forge build
+        id: build
+
+      - name: Run Forge tests
+        run: forge test -vvv
+        id: test
+
+      - name: Run Forge coverage
+        run: forge coverage --report lcov
+        id: coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./contracts/lcov.info
+          flags: contracts
+          name: contracts-coverage
+          fail_ci_if_error: false
+
+  lint:
+    name: Solidity Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge fmt check
+        run: forge fmt --check
+
+  gas-report:
+    name: Gas Report
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run gas report
+        run: forge test --gas-report
+
+      - name: Generate gas snapshot
+        run: forge snapshot --check
+
+  slither:
+    name: Slither Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.3.0
+        continue-on-error: true
+        with:
+          target: 'contracts/'
+          slither-args: --filter-paths "lib|test"
+          fail-on: none
+
+      - name: Upload Slither results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slither-report
+          path: results.sarif
+          retention-days: 30
