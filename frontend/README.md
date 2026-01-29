@@ -6,6 +6,7 @@ This is the frontend application for Zali, a Web3 trivia game built on Base netw
 
 - **Modern React/Next.js** with TypeScript
 - **Web3 Integration** with Wagmi and Viem
+- **Dark Mode Support** with system preference detection
 - **Comprehensive Loading System** with progress indicators
 - **Responsive Design** with TailwindCSS
 - **Smooth Animations** with Framer Motion
@@ -28,6 +29,18 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Dark Mode
+
+The application features a comprehensive dark mode theme system. See [DARK_MODE.md](./DARK_MODE.md) for detailed documentation.
+
+### Features
+
+- Light, dark, and system theme modes
+- Persistent theme selection (localStorage)
+- Smooth theme transitions
+- System preference detection
+- Accessible theme toggle component
 
 ## Loading System
 

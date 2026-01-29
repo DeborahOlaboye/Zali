@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen`}>
+      <body className={`${inter.className} antialiased bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 min-h-screen transition-colors duration-300`}>
         <Providers>
           <Suspense fallback={null}>
             <PageTracker />
@@ -35,7 +35,7 @@ export default function RootLayout({
           <AutoFaucetProvider>
             <SkipNavLink />
             <Navbar />
-            <main id="main-content" className="min-h-screen">
+            <main id="main-content" className="min-h-screen text-foreground">
               {children}
             </main>
             <Toaster position="top-right" />

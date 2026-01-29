@@ -18,10 +18,10 @@ export default function Home() {
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-green-600 to-yellow-500 bg-clip-text text-transparent mb-6">
                 Zali: Learn, Play, Earn
               </h1>
-              <p className="text-xl sm:text-2xl text-gray-700 mb-4 max-w-3xl mx-auto">
+              <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-300 mb-4 max-w-3xl mx-auto">
                 Learn about Celo & DeFi while earning real cUSD rewards via MiniPay
               </p>
-              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
                 Mobile-first trivia game optimized for MiniPay with seamless cUSD rewards
               </p>
             </motion.div>

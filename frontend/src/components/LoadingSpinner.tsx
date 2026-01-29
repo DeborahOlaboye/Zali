@@ -75,21 +75,21 @@ export function LoadingSpinner({
       />
       
       {progress !== undefined && (
-        <div className="mt-2 w-32 bg-gray-200 rounded-full h-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+        <div className="mt-2 w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
           <motion.div
-            className="bg-blue-600 h-2 rounded-full"
+            className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
       )}
-      
+
       {message && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="mt-2 text-sm text-gray-600 text-center"
+          className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center"
           aria-live="polite"
         >
           {message}
