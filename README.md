@@ -3,7 +3,6 @@
 
 A Web3 trivia game built on Base network.
 Players can play trivia rounds, answer questions, and earn real ETH rewards on-chain.
-
 ---
 
 ## 📱 **Overview**
